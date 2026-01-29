@@ -25,15 +25,16 @@ This project is in early development. Documentation will be continuously updated
 
 | Document | Status | Description |
 |----------|--------|-------------|
-| [docs/architecture/README.md](docs/architecture/README.md) | 🔄 Coming Soon | System architecture and design decisions |
-| [docs/api/README.md](docs/api/README.md) | 🔄 Coming Soon | API reference and usage |
-| [docs/development/README.md](docs/development/README.md) | 🔄 Coming Soon | Development environment setup and guidelines |
-| [docs/examples/README.md](docs/examples/README.md) | 🔄 Coming Soon | Code examples and tutorials |
+| [docs/architecture/README.md](docs/architecture/README.md) | ✅ Available | System architecture and design decisions (content coming soon) |
+| [docs/api/README.md](docs/api/README.md) | ✅ Available | API reference and usage (content coming soon) |
+| [docs/development/README.md](docs/development/README.md) | ✅ Available | Development environment setup and guidelines (content coming soon) |
+| [docs/examples/README.md](docs/examples/README.md) | ✅ Available | Code examples and tutorials (content coming soon) |
 
 ### User Guides
 
 | Document | Status | Description |
 |----------|--------|-------------|
+| [docs/user-guide/README.md](docs/user-guide/README.md) | ✅ Available | User guide overview (detailed guides coming soon) |
 | [docs/user-guide/getting-started.md](docs/user-guide/getting-started.md) | 🔄 Coming Soon | Getting started with Meowstik |
 | [docs/user-guide/configuration.md](docs/user-guide/configuration.md) | 🔄 Coming Soon | Configuration options and best practices |
 | [docs/user-guide/troubleshooting.md](docs/user-guide/troubleshooting.md) | 🔄 Coming Soon | Common issues and solutions |

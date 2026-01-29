@@ -20,15 +20,13 @@
 
 ## Overview
 
-Meowstik is an Agentia Compiler designed to [provide a brief description of what Agentia Compiler does and its purpose].
+Meowstik is an Agentia Compiler, a specialized compiler toolchain for the Agentia programming paradigm.
 
 > **Note**: This project is currently in early development. Features and documentation will be added as the project evolves.
 
 ## Features
 
-- 🚀 [Feature 1 - To be added]
-- 🔧 [Feature 2 - To be added]
-- 📦 [Feature 3 - To be added]
+*Features will be documented as they are implemented during active development.*
 
 ## Getting Started
 
@@ -82,4 +80,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-*Last Updated: January 2026*
+*Last Updated: January 29, 2026*
