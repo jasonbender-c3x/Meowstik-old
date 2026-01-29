@@ -20,7 +20,7 @@ export interface AgentSchema {
 export interface Tool {
   name: string;
   description: string;
-  parameters?: Record<string, any>;
+  parameters?: Record<string, unknown>;
 }
 
 export const defaultAgentSchema: Partial<AgentSchema> = {
