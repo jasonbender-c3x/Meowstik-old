@@ -1,0 +1,21 @@
+{
+  "name": "meowstik",
+  "version": "0.1.0",
+  "description": "Agentia Compiler",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "keywords": ["ai", "gemini", "agent", "compiler"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "dotenv": "^16.4.7"
+  }
+}
