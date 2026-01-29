@@ -74,12 +74,14 @@ export function MeowstikLayout() {
   };
 
   const handleClearHistory = () => {
-    if (geminiService) {
-      geminiService.clearHistory();
-      setConversationHistory([]);
-      setGeneratedAgent(null);
-      setError(null);
+    if (!geminiService) {
+      console.warn('Gemini service not initialized');
+      return;
     }
+    geminiService.clearHistory();
+    setConversationHistory([]);
+    setGeneratedAgent(null);
+    setError(null);
   };
 
   const handleSaveApiKey = () => {
@@ -203,6 +205,10 @@ export function MeowstikLayout() {
             >
               Google AI Studio
             </a>
+          </p>
+          <p style={{ fontSize: '0.75rem', color: '#dc2626', marginTop: '0.25rem', fontWeight: '500' }}>
+            ⚠️ Security Notice: API keys are stored unencrypted in browser localStorage. 
+            Only use this for development/testing. Do not use production API keys.
           </p>
         </div>
       )}

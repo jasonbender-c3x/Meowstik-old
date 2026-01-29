@@ -23,7 +23,7 @@ export function IntentPanel({ onSendMessage, conversationHistory = [] }: IntentP
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSubmit(e);
@@ -55,7 +55,7 @@ export function IntentPanel({ onSendMessage, conversationHistory = [] }: IntentP
           <>
             {conversationHistory.map((msg, idx) => (
               <div
-                key={idx}
+                key={`${msg.role}-${msg.timestamp.getTime()}-${idx}`}
                 style={{
                   marginBottom: '1rem',
                   padding: '0.75rem',
@@ -71,16 +71,14 @@ export function IntentPanel({ onSendMessage, conversationHistory = [] }: IntentP
                   fontSize: '0.875rem',
                 }}>
                   {msg.role === 'user' ? 'You' : 'Assistant'}
-                  {msg.timestamp && (
-                    <span style={{ 
-                      fontWeight: 'normal', 
-                      marginLeft: '0.5rem',
-                      color: '#6b7280',
-                      fontSize: '0.75rem' 
-                    }}>
-                      {new Date(msg.timestamp).toLocaleTimeString()}
-                    </span>
-                  )}
+                  <span style={{ 
+                    fontWeight: 'normal', 
+                    marginLeft: '0.5rem',
+                    color: '#6b7280',
+                    fontSize: '0.75rem' 
+                  }}>
+                    {msg.timestamp.toLocaleTimeString()}
+                  </span>
                 </div>
                 <div style={{ 
                   whiteSpace: 'pre-wrap', 
@@ -104,7 +102,7 @@ export function IntentPanel({ onSendMessage, conversationHistory = [] }: IntentP
           placeholder="Enter your prompt here... (Shift+Enter for new line, Enter to send)"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyDown}
           style={{ marginBottom: '0.5rem' }}
         />
         <button

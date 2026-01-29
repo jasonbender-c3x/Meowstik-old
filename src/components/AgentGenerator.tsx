@@ -2,12 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { GoogleGenerativeAI, ChatSession } from '@google/generative-ai';
 import { Sparkles, Code2, Eye, Settings, Send, Loader2, Trash2 } from 'lucide-react';
 import type { AgentSchema } from '../types/agent';
-
-interface ConversationMessage {
-  role: 'user' | 'model';
-  content: string;
-  timestamp: Date;
-}
+import type { ConversationMessage } from '../GeminiService';
 
 export default function AgentGenerator() {
   const [prompt, setPrompt] = useState('');
@@ -116,7 +111,7 @@ You have access to conversation history and should consider previous context whe
       // Add user message to history
       const userMessage: ConversationMessage = {
         role: 'user',
-        content: prompt,
+        parts: prompt,
         timestamp: new Date(),
       };
       setConversationHistory(prev => [...prev, userMessage]);
@@ -129,7 +124,7 @@ You have access to conversation history and should consider previous context whe
       // Add model response to history
       const modelMessage: ConversationMessage = {
         role: 'model',
-        content: text,
+        parts: text,
         timestamp: new Date(),
       };
       setConversationHistory(prev => [...prev, modelMessage]);
@@ -153,7 +148,7 @@ You have access to conversation history and should consider previous context whe
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleGenerate();
@@ -271,7 +266,7 @@ You have access to conversation history and should consider previous context whe
                 <>
                   {conversationHistory.map((msg, idx) => (
                     <div
-                      key={idx}
+                      key={`${msg.role}-${msg.timestamp.getTime()}-${idx}`}
                       className={`mb-3 p-3 rounded-lg ${
                         msg.role === 'user'
                           ? 'bg-blue-100 border border-blue-200'
@@ -289,7 +284,7 @@ You have access to conversation history and should consider previous context whe
                         </span>
                       </div>
                       <div className="text-sm text-gray-700 whitespace-pre-wrap break-words">
-                        {msg.content}
+                        {msg.parts}
                       </div>
                     </div>
                   ))}
@@ -302,7 +297,7 @@ You have access to conversation history and should consider previous context whe
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyDown}
               placeholder="E.g., 'Create a customer support agent that can handle billing inquiries...'"
               className="p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent h-32"
             />

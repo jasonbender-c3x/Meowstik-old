@@ -20,7 +20,7 @@ export interface AgentSpecification {
 export interface ConversationMessage {
   role: 'user' | 'model';
   parts: string;
-  timestamp?: Date;
+  timestamp: Date;
 }
 
 /**
@@ -157,10 +157,13 @@ You have access to conversation history and should consider previous context whe
 
   /**
    * Get the conversation history
-   * @returns Array of conversation messages
+   * @returns Array of conversation messages (deep copy for safety)
    */
   getConversationHistory(): ConversationMessage[] {
-    return [...this.conversationHistory];
+    return this.conversationHistory.map(msg => ({
+      ...msg,
+      timestamp: new Date(msg.timestamp),
+    }));
   }
 
   /**
