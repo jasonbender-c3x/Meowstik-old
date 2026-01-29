@@ -1,0 +1,176 @@
+{
+  "component": "EvolutionCenter",
+  "version": "1.0.0",
+  "lastUpdated": "2026-01-29",
+  "description": "Test suite for EvolutionCenter component",
+  "tests": [
+    {
+      "id": "evolution-001",
+      "name": "EvolutionCenter renders correctly",
+      "type": "unit",
+      "steps": [
+        {
+          "action": "Mount EvolutionCenter component",
+          "expected": "Component renders without errors"
+        },
+        {
+          "action": "Verify header with title 'Evolution Center'",
+          "expected": "Header is displayed with correct title"
+        },
+        {
+          "action": "Verify 'Analyze Logs' button is present",
+          "expected": "Analyze button is visible"
+        },
+        {
+          "action": "Verify log input textarea is present",
+          "expected": "Textarea for log input is displayed"
+        }
+      ],
+      "priority": "high",
+      "status": "active"
+    },
+    {
+      "id": "evolution-002",
+      "name": "Log file upload works",
+      "type": "integration",
+      "steps": [
+        {
+          "action": "Click 'Upload Log File' button",
+          "expected": "File picker dialog opens"
+        },
+        {
+          "action": "Select a log file",
+          "expected": "File is read and content appears in textarea"
+        }
+      ],
+      "priority": "high",
+      "status": "active"
+    },
+    {
+      "id": "evolution-003",
+      "name": "Log analysis detects error patterns",
+      "type": "integration",
+      "steps": [
+        {
+          "action": "Paste sample error logs in textarea",
+          "expected": "Logs are displayed in textarea"
+        },
+        {
+          "action": "Click 'Analyze Logs' button",
+          "expected": "Loading state is shown"
+        },
+        {
+          "action": "Wait for analysis to complete",
+          "expected": "Analysis results are displayed"
+        },
+        {
+          "action": "Verify error patterns are identified",
+          "expected": "Error patterns section shows detected patterns"
+        }
+      ],
+      "priority": "high",
+      "status": "active"
+    },
+    {
+      "id": "evolution-004",
+      "name": "GitHub issues are generated for recurring errors",
+      "type": "integration",
+      "steps": [
+        {
+          "action": "Analyze logs with recurring errors",
+          "expected": "Analysis completes successfully"
+        },
+        {
+          "action": "Check 'Auto-Generated GitHub Issues' section",
+          "expected": "Issues are generated for patterns meeting threshold"
+        },
+        {
+          "action": "Verify issue contains proper metadata",
+          "expected": "Issue has title, labels, and copilot assignment"
+        },
+        {
+          "action": "Expand issue details",
+          "expected": "Full issue body is displayed"
+        }
+      ],
+      "priority": "high",
+      "status": "active"
+    },
+    {
+      "id": "evolution-005",
+      "name": "Min occurrences threshold works",
+      "type": "integration",
+      "steps": [
+        {
+          "action": "Set min occurrences to 5",
+          "expected": "Value is updated in input field"
+        },
+        {
+          "action": "Analyze logs with varying error counts",
+          "expected": "Only patterns with 5+ occurrences generate issues"
+        }
+      ],
+      "priority": "medium",
+      "status": "active"
+    },
+    {
+      "id": "evolution-006",
+      "name": "Error handling for empty input",
+      "type": "unit",
+      "steps": [
+        {
+          "action": "Click 'Analyze Logs' without entering logs",
+          "expected": "Error message is displayed"
+        },
+        {
+          "action": "Verify error message content",
+          "expected": "Message states logs are required"
+        }
+      ],
+      "priority": "medium",
+      "status": "active"
+    },
+    {
+      "id": "evolution-007",
+      "name": "Summary statistics are accurate",
+      "type": "integration",
+      "steps": [
+        {
+          "action": "Analyze logs with known error count",
+          "expected": "Analysis completes"
+        },
+        {
+          "action": "Check 'Total Logs' card",
+          "expected": "Correct total count is displayed"
+        },
+        {
+          "action": "Check 'Errors Found' card",
+          "expected": "Correct error count is displayed"
+        },
+        {
+          "action": "Check 'Issues Generated' card",
+          "expected": "Correct issue count is displayed"
+        }
+      ],
+      "priority": "high",
+      "status": "active"
+    },
+    {
+      "id": "evolution-008",
+      "name": "Error pattern severity is correctly assigned",
+      "type": "unit",
+      "steps": [
+        {
+          "action": "Analyze logs with critical errors",
+          "expected": "Critical errors are marked as 'critical' severity"
+        },
+        {
+          "action": "Verify severity badge colors",
+          "expected": "Severity badges have appropriate colors"
+        }
+      ],
+      "priority": "medium",
+      "status": "active"
+    }
+  ]
+}

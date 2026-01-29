@@ -6,6 +6,8 @@ import { getGeminiService, ConversationMessage, AgentSpecification } from '../Ge
 import { useRAG } from '../hooks/useRAG';
 import './MeowstikLayout.css';
 
+type ActiveView = 'workspace' | 'evolution';
+
 export function MeowstikLayout() {
   const [dividerPosition, setDividerPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
@@ -207,6 +209,23 @@ export function MeowstikLayout() {
             <Settings size={24} />
           </button>
         </div>
+        
+        <nav className="nav-tabs">
+          <button
+            onClick={() => setActiveView('workspace')}
+            className={`nav-tab ${activeView === 'workspace' ? 'active' : ''}`}
+          >
+            <Cpu size={18} />
+            <span>Workspace</span>
+          </button>
+          <button
+            onClick={() => setActiveView('evolution')}
+            className={`nav-tab ${activeView === 'evolution' ? 'active' : ''}`}
+          >
+            <FlaskConical size={18} />
+            <span>Evolution Center</span>
+          </button>
+        </nav>
       </header>
 
       {/* Settings Panel */}
@@ -353,29 +372,32 @@ export function MeowstikLayout() {
         </div>
       )}
       
-      <div className="split-pane-container">
-        <div 
-          className="left-pane"
-          style={{ width: `${dividerPosition}%` }}
-        >
-          <IntentPanel 
-            onSendMessage={handleSendMessage}
-            conversationHistory={conversationHistory}
+      {activeView === 'workspace' ? (
+        <div className="split-pane-container">
+          <div 
+            className="left-pane"
+            style={{ width: `${dividerPosition}%` }}
+          >
+            <IntentPanel />
+          </div>
+          
+          <div 
+            className="divider"
+            onMouseDown={handleMouseDown}
           />
+          
+          <div 
+            className="right-pane"
+            style={{ width: `${100 - dividerPosition}%` }}
+          >
+            <ArtifactPreview />
+          </div>
         </div>
-        
-        <div 
-          className="divider"
-          onMouseDown={handleMouseDown}
-        />
-        
-        <div 
-          className="right-pane"
-          style={{ width: `${100 - dividerPosition}%` }}
-        >
-          <ArtifactPreview agent={generatedAgent} />
+      ) : (
+        <div className="evolution-container">
+          <EvolutionCenter />
         </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -1,0 +1,67 @@
+{
+  "page": "PageName",
+  "version": "1.0.0",
+  "lastUpdated": "YYYY-MM-DD",
+  "description": "Test suite for PageName page",
+  "tests": [
+    {
+      "id": "test-001",
+      "name": "Page loads successfully",
+      "type": "e2e",
+      "steps": [
+        {
+          "action": "Navigate to page URL",
+          "expected": "Page loads without errors"
+        },
+        {
+          "action": "Verify page title",
+          "expected": "Correct page title is displayed"
+        },
+        {
+          "action": "Check for required elements",
+          "expected": "All critical page elements are present"
+        }
+      ],
+      "priority": "high",
+      "status": "active"
+    },
+    {
+      "id": "test-002",
+      "name": "Navigation works correctly",
+      "type": "e2e",
+      "steps": [
+        {
+          "action": "Click navigation links",
+          "expected": "Navigation updates correctly"
+        },
+        {
+          "action": "Verify URL changes",
+          "expected": "URL reflects current page"
+        }
+      ],
+      "priority": "high",
+      "status": "active"
+    },
+    {
+      "id": "test-003",
+      "name": "Page is responsive",
+      "type": "e2e",
+      "steps": [
+        {
+          "action": "Resize viewport to mobile",
+          "expected": "Layout adapts to mobile view"
+        },
+        {
+          "action": "Resize viewport to tablet",
+          "expected": "Layout adapts to tablet view"
+        },
+        {
+          "action": "Resize viewport to desktop",
+          "expected": "Layout displays correctly on desktop"
+        }
+      ],
+      "priority": "medium",
+      "status": "active"
+    }
+  ]
+}
