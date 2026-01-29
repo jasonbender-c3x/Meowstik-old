@@ -148,6 +148,9 @@ Return ONLY valid JSON, no markdown formatting or explanation.`;
               Google AI Studio
             </a>
           </p>
+          <p className="text-xs text-orange-600 mt-1">
+            ⚠️ For demo purposes only. API key is stored in browser memory and will be lost on page refresh.
+          </p>
         </div>
       )}
 
@@ -155,11 +158,9 @@ Return ONLY valid JSON, no markdown formatting or explanation.`;
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         {/* Left Panel - Chat Interface */}
         <div
-          className="lg:border-r border-gray-200 bg-white flex flex-col"
+          className="lg:border-r border-gray-200 bg-white flex flex-col min-h-[300px] lg:min-h-0 w-full"
           style={{
-            width: window.innerWidth >= 1024 ? `${leftPanelWidth}%` : '100%',
-            height: window.innerWidth >= 1024 ? '100%' : 'auto',
-            minHeight: window.innerWidth < 1024 ? '300px' : 'auto',
+            width: window.matchMedia('(min-width: 1024px)').matches ? `${leftPanelWidth}%` : '100%',
           }}
         >
           <div className="p-6 flex-1 flex flex-col">
@@ -200,12 +201,10 @@ Return ONLY valid JSON, no markdown formatting or explanation.`;
         </div>
 
         {/* Resizer (Desktop only) */}
-        {window.innerWidth >= 1024 && (
-          <div
-            className="hidden lg:block w-1 bg-gray-200 hover:bg-purple-400 cursor-col-resize transition-colors"
-            onMouseDown={startResize}
-          />
-        )}
+        <div
+          className="hidden lg:block w-1 bg-gray-200 hover:bg-purple-400 cursor-col-resize transition-colors"
+          onMouseDown={startResize}
+        />
 
         {/* Right Panel - Preview/Code View */}
         <div className="flex-1 flex flex-col bg-gray-50 overflow-hidden">
