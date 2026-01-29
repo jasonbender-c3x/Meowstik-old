@@ -38,8 +38,8 @@ export function useRAG(apiKey: string | null) {
       const ingestion = createIngestionService(rag);
       const gemini = createEnhancedGeminiService(apiKey);
 
-      // Enable RAG on gemini service
-      gemini.enableRAG(rag, storage, ingestion);
+      // Enable RAG on gemini service (await to ensure completion)
+      await gemini.enableRAG(rag, storage, ingestion);
 
       // Set services
       setRagService(rag);
@@ -81,15 +81,21 @@ export function useRAG(apiKey: string | null) {
    * Toggle RAG on/off
    */
   const toggleRAG = useCallback(() => {
-    if (geminiService) {
-      const newState = !ragEnabled;
-      setRagEnabled(newState);
-      
-      if (newState) {
-        geminiService.enableRAG(ragService!, storageService!, ingestionService!);
-      } else {
-        geminiService.disableRAG();
-      }
+    if (!geminiService || !ragService || !storageService || !ingestionService) {
+      console.warn('RAG services not initialized');
+      return;
+    }
+    
+    const newState = !ragEnabled;
+    setRagEnabled(newState);
+    
+    if (newState) {
+      geminiService.enableRAG(ragService, storageService, ingestionService).catch(err => {
+        console.error('Failed to enable RAG:', err);
+        setError('Failed to enable RAG');
+      });
+    } else {
+      geminiService.disableRAG();
     }
   }, [geminiService, ragEnabled, ragService, storageService, ingestionService]);
 

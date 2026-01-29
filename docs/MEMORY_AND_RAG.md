@@ -144,8 +144,6 @@ await ingestionService.ingestAgent(agent, userId);
 
 #### Benefits of RAG
 
-#### Benefits of RAG
-
 - ✅ **Context Awareness**: Agent generation informed by past interactions
 - ✅ **Consistency**: Similar prompts leverage previous successful agents
 - ✅ **Learning**: System improves with usage

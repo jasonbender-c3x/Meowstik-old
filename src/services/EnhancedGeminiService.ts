@@ -20,18 +20,18 @@ export class EnhancedGeminiService extends GeminiService {
    * @param storageService - Storage service instance
    * @param ingestionService - Ingestion service instance
    */
-  enableRAG(
+  async enableRAG(
     ragService: RAGService,
     storageService: StorageService,
     ingestionService: IngestionService
-  ): void {
+  ): Promise<void> {
     this.ragService = ragService;
     this.storageService = storageService;
     this.ingestionService = ingestionService;
     this.userId = storageService.getUserId();
     
-    // Load and ingest existing data
-    this.loadAndIngestPersistedData();
+    // Load and ingest existing data (await to ensure completion)
+    await this.loadAndIngestPersistedData();
   }
 
   /**
@@ -60,12 +60,9 @@ export class EnhancedGeminiService extends GeminiService {
       // Load existing documents
       const documents = this.storageService.loadDocuments();
       
-      // Restore documents to RAG service
+      // Restore documents to RAG service (no embedding regeneration)
       for (const doc of documents) {
-        if (doc.embedding) {
-          // Document already has embedding, add it directly
-          await this.ragService.addDocument(doc.content, doc.metadata);
-        }
+        this.ragService.restoreDocument(doc);
       }
 
       // Load and ingest conversation history

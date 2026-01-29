@@ -87,6 +87,11 @@ export class RAGService {
       normB += b[i] * b[i];
     }
 
+    // Handle zero-norm vectors
+    if (normA === 0 || normB === 0) {
+      return 0;
+    }
+
     return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
   }
 
@@ -111,6 +116,15 @@ export class RAGService {
 
     this.documents.set(id, document);
     return document;
+  }
+
+  /**
+   * Restore a document with an existing embedding (no API call)
+   * Used when loading from storage
+   * @param document - Complete document with embedding
+   */
+  restoreDocument(document: Document): void {
+    this.documents.set(document.id, document);
   }
 
   /**

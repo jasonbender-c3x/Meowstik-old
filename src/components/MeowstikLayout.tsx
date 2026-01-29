@@ -139,7 +139,7 @@ export function MeowstikLayout() {
             color: '#6b7280',
             fontWeight: 'normal' 
           }}>
-            with RAG & Conversation Memory
+            {rag.isInitialized ? 'with RAG & Conversation Memory' : 'with Conversation Memory'}
           </span>
           {rag.isInitialized && (
             <span style={{

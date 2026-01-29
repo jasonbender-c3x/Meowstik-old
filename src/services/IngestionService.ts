@@ -20,6 +20,15 @@ export class IngestionService {
    * @returns string[] - Array of text chunks
    */
   private chunkText(text: string, chunkSize: number = 1000, overlap: number = 200): string[] {
+    // Validate inputs
+    if (overlap >= chunkSize) {
+      throw new Error('Overlap must be less than chunk size');
+    }
+    
+    if (chunkSize <= 0 || overlap < 0) {
+      throw new Error('Chunk size must be positive and overlap must be non-negative');
+    }
+    
     const chunks: string[] = [];
     let start = 0;
 
@@ -65,10 +74,19 @@ export class IngestionService {
       const userMsg = history[i];
       const modelMsg = history[i + 1];
       
-      if (userMsg && modelMsg) {
+      // Validate message roles
+      if (userMsg && modelMsg && userMsg.role === 'user' && modelMsg.role === 'model') {
         const content = `User: ${userMsg.parts}\n\nAssistant: ${modelMsg.parts}`;
         
         await this.ragService.addDocument(content, {
+          type: 'conversation',
+          userId,
+          source: 'chat_history',
+          timestamp: userMsg.timestamp.toISOString(),
+        });
+      } else if (userMsg) {
+        // Handle single user message without response
+        await this.ragService.addDocument(`User: ${userMsg.parts}`, {
           type: 'conversation',
           userId,
           source: 'chat_history',
