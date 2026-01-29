@@ -11,7 +11,7 @@ export interface AgentSpecification {
   name: string;
   description: string;
   capabilities: string[];
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
 }
 
 /**
@@ -95,7 +95,7 @@ Always respond with valid JSON only. Do not include markdown code blocks or any 
         const jsonText = jsonMatch ? jsonMatch[1] : text.trim();
         
         jsonResponse = JSON.parse(jsonText) as AgentSpecification;
-      } catch (parseError) {
+      } catch {
         // Truncate error message to avoid exposing large responses
         const truncatedText = text.length > 200 ? text.substring(0, 200) + '...' : text;
         throw new Error(`Failed to parse JSON response. Response preview: ${truncatedText}`);

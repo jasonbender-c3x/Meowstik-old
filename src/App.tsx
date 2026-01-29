@@ -1,8 +1,7 @@
-import AgentGenerator from './components/AgentGenerator'
+import { MeowstikLayout } from './components/MeowstikLayout'
 
 function App() {
-  return <AgentGenerator />
+  return <MeowstikLayout />
 }
 
 export default App
-
