@@ -157,7 +157,7 @@ For general Meowstik documentation:
 
 ### Phase 1: Foundation (Current)
 - [x] Project structure and documentation
-- [ ] Basic Node.js server setup
+- [x] Basic Node.js server setup
 - [ ] Simple code editor integration
 - [ ] Basic preview pane with iframe sandbox
 

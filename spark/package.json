@@ -4,7 +4,7 @@
   "description": "Web application prototyping and development tool with live preview",
   "main": "src/server/index.js",
   "scripts": {
-    "dev": "node src/server/index.js",
+    "dev": "nodemon src/server/index.js",
     "start": "NODE_ENV=production node src/server/index.js",
     "build": "echo 'Build script to be implemented'",
     "test": "echo 'Tests to be implemented'",
@@ -32,5 +32,10 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.0"
+  },
+  "nodemonConfig": {
+    "watch": ["src"],
+    "ext": "js,json",
+    "ignore": ["src/**/*.test.js", "node_modules"]
   }
 }
