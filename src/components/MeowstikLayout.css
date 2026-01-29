@@ -1,0 +1,144 @@
+.meowstik-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #0f172a; /* slate-900 */
+  color: #e2e8f0; /* slate-200 */
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+}
+
+.meowstik-header {
+  background-color: #1e293b; /* slate-800 */
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #334155; /* slate-700 */
+  display: flex;
+  align-items: center;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo-icon {
+  color: #60a5fa; /* blue-400 */
+}
+
+.logo-text {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  color: #f1f5f9; /* slate-100 */
+}
+
+.split-pane-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.left-pane,
+.right-pane {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.left-pane {
+  background-color: #0f172a; /* slate-900 */
+  border-right: 1px solid #334155; /* slate-700 */
+}
+
+.right-pane {
+  background-color: #0f172a; /* slate-900 */
+}
+
+.divider {
+  width: 4px;
+  background-color: #334155; /* slate-700 */
+  cursor: col-resize;
+  transition: background-color 0.2s;
+}
+
+.divider:hover {
+  background-color: #60a5fa; /* blue-400 */
+}
+
+.panel-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8; /* slate-400 */
+  padding: 1rem 1.5rem;
+  margin: 0;
+  border-bottom: 1px solid #334155; /* slate-700 */
+  background-color: #1e293b; /* slate-800 */
+}
+
+/* IntentPanel Styles */
+.intent-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.intent-textarea {
+  flex: 1;
+  background-color: #0f172a; /* slate-900 */
+  color: #e2e8f0; /* slate-200 */
+  border: none;
+  padding: 1.5rem;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  resize: none;
+  outline: none;
+}
+
+.intent-textarea::placeholder {
+  color: #64748b; /* slate-500 */
+}
+
+/* ArtifactPreview Styles */
+.artifact-preview {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.json-display {
+  flex: 1;
+  background-color: #0f172a; /* slate-900 */
+  color: #e2e8f0; /* slate-200 */
+  padding: 1.5rem;
+  margin: 0;
+  overflow: auto;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+/* Scrollbar Styles */
+.intent-textarea::-webkit-scrollbar,
+.json-display::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.intent-textarea::-webkit-scrollbar-track,
+.json-display::-webkit-scrollbar-track {
+  background: #1e293b; /* slate-800 */
+}
+
+.intent-textarea::-webkit-scrollbar-thumb,
+.json-display::-webkit-scrollbar-thumb {
+  background: #475569; /* slate-600 */
+  border-radius: 4px;
+}
+
+.intent-textarea::-webkit-scrollbar-thumb:hover,
+.json-display::-webkit-scrollbar-thumb:hover {
+  background: #64748b; /* slate-500 */
+}
