@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
+import { GoogleGenerativeAI, GenerativeModel, ChatSession } from '@google/generative-ai';
 import * as dotenv from 'dotenv';
 
 // Load environment variables
@@ -15,12 +15,24 @@ export interface AgentSpecification {
 }
 
 /**
+ * Interface for conversation history messages
+ */
+export interface ConversationMessage {
+  role: 'user' | 'model';
+  parts: string;
+  timestamp: Date;
+}
+
+/**
  * Service for interacting with Google's Gemini AI API
  * Provides functionality to generate agent specifications from natural language prompts
  */
 export class GeminiService {
   private genAI: GoogleGenerativeAI | null = null;
   private model: GenerativeModel | null = null;
+  private chatSession: ChatSession | null = null;
+  private conversationHistory: ConversationMessage[] = [];
+  private systemInstruction: string;
 
   constructor(apiKey?: string) {
     const key = apiKey || process.env.GEMINI_API_KEY;
@@ -30,6 +42,23 @@ export class GeminiService {
     }
 
     this.genAI = new GoogleGenerativeAI(key);
+    
+    // Consistent system instruction for all interactions
+    this.systemInstruction = `You are an expert AI assistant that generates agent specifications in JSON format.
+Given a natural language description, you must respond with ONLY valid JSON, no additional text or explanations.
+
+The JSON should follow this structure:
+{
+  "name": "string - the name of the agent",
+  "description": "string - a brief description of what the agent does",
+  "capabilities": ["array of strings - list of agent capabilities"],
+  "parameters": {
+    "key": "value - any configuration parameters"
+  }
+}
+
+Always respond with valid JSON only. Do not include markdown code blocks or any other formatting.
+You have access to conversation history and should consider previous context when generating responses.`;
     
     // Initialize the model with JSON response formatting
     // Using gemini-1.5-flash for faster responses, can be configured for gemini-1.5-pro
@@ -41,11 +70,28 @@ export class GeminiService {
         topP: 0.95,
         maxOutputTokens: 8192,
       },
+      systemInstruction: this.systemInstruction,
+    });
+    
+    // Initialize chat session with empty history
+    this.initializeChatSession();
+  }
+
+  /**
+   * Initialize or reset the chat session
+   */
+  private initializeChatSession(): void {
+    if (!this.model) {
+      throw new Error('Model is not initialized');
+    }
+    
+    this.chatSession = this.model.startChat({
+      history: [],
     });
   }
 
   /**
-   * Generate an agent specification from a natural language prompt
+   * Generate an agent specification from a natural language prompt using chat session
    * @param prompt - The natural language description of the desired agent
    * @returns Promise<AgentSpecification> - The generated agent specification as a JSON object
    */
@@ -59,33 +105,25 @@ export class GeminiService {
       throw new Error('Prompt exceeds maximum length of 10000 characters');
     }
 
-    if (!this.model) {
-      throw new Error('GeminiService is not properly initialized');
+    if (!this.chatSession) {
+      throw new Error('Chat session is not properly initialized');
     }
+
     try {
-      // System instruction to enforce JSON output
-      const systemInstruction = `You are an expert AI assistant that generates agent specifications in JSON format.
-Given a natural language description, you must respond with ONLY valid JSON, no additional text or explanations.
+      // Format the user request
+      const userMessage = `User request: ${prompt}\n\nJSON response:`;
 
-The JSON should follow this structure:
-{
-  "name": "string - the name of the agent",
-  "description": "string - a brief description of what the agent does",
-  "capabilities": ["array of strings - list of agent capabilities"],
-  "parameters": {
-    "key": "value - any configuration parameters"
-  }
-}
-
-Always respond with valid JSON only. Do not include markdown code blocks or any other formatting.`;
-
-      // Combine system instruction with user prompt
-      const fullPrompt = `${systemInstruction}\n\nUser request: ${prompt}\n\nJSON response:`;
-
-      // Generate content
-      const result = await this.model.generateContent(fullPrompt);
+      // Send message through chat session (maintains history)
+      const result = await this.chatSession.sendMessage(userMessage);
       const response = result.response;
       const text = response.text();
+
+      // Store in conversation history
+      this.conversationHistory.push({
+        role: 'user',
+        parts: prompt,
+        timestamp: new Date(),
+      });
 
       // Parse the JSON response
       let jsonResponse: AgentSpecification;
@@ -95,6 +133,13 @@ Always respond with valid JSON only. Do not include markdown code blocks or any 
         const jsonText = jsonMatch ? jsonMatch[1] : text.trim();
         
         jsonResponse = JSON.parse(jsonText) as AgentSpecification;
+        
+        // Store model response in conversation history
+        this.conversationHistory.push({
+          role: 'model',
+          parts: text,
+          timestamp: new Date(),
+        });
       } catch {
         // Truncate error message to avoid exposing large responses
         const truncatedText = text.length > 200 ? text.substring(0, 200) + '...' : text;
@@ -108,6 +153,33 @@ Always respond with valid JSON only. Do not include markdown code blocks or any 
       }
       throw new Error('Failed to generate agent: Unknown error');
     }
+  }
+
+  /**
+   * Get the conversation history
+   * @returns Array of conversation messages (deep copy for safety)
+   */
+  getConversationHistory(): ConversationMessage[] {
+    return this.conversationHistory.map(msg => ({
+      ...msg,
+      timestamp: new Date(msg.timestamp),
+    }));
+  }
+
+  /**
+   * Clear conversation history and reset chat session
+   */
+  clearHistory(): void {
+    this.conversationHistory = [];
+    this.initializeChatSession();
+  }
+
+  /**
+   * Get the count of messages in conversation history
+   * @returns Number of messages
+   */
+  getHistoryLength(): number {
+    return this.conversationHistory.length;
   }
 
 }

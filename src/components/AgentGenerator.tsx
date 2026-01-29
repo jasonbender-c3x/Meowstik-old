@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import { Sparkles, Code2, Eye, Settings, Send, Loader2 } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { GoogleGenerativeAI, ChatSession } from '@google/generative-ai';
+import { Sparkles, Code2, Eye, Settings, Send, Loader2, Trash2 } from 'lucide-react';
 import type { AgentSchema } from '../types/agent';
+import type { ConversationMessage } from '../GeminiService';
 
 export default function AgentGenerator() {
   const [prompt, setPrompt] = useState('');
@@ -12,28 +13,31 @@ export default function AgentGenerator() {
   const [showSettings, setShowSettings] = useState(false);
   const [viewMode, setViewMode] = useState<'preview' | 'code'>('preview');
   const [leftPanelWidth, setLeftPanelWidth] = useState(40); // percentage
+  const [conversationHistory, setConversationHistory] = useState<ConversationMessage[]>([]);
+  const [chatSession, setChatSession] = useState<ChatSession | null>(null);
+  const historyEndRef = useRef<HTMLDivElement>(null);
 
-  const handleGenerate = async () => {
-    if (!apiKey) {
-      setError('Please enter your Gemini API key in settings');
-      setShowSettings(true);
-      return;
-    }
+  // Auto-scroll to bottom when conversation history updates
+  useEffect(() => {
+    historyEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [conversationHistory]);
 
-    if (!prompt.trim()) {
-      setError('Please enter a prompt to generate an agent');
-      return;
-    }
+  // Initialize chat session when API key is set
+  useEffect(() => {
+    if (apiKey) {
+      try {
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({ 
+          model: 'gemini-1.5-flash',
+          generationConfig: {
+            temperature: 0.7,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 8192,
+          },
+          systemInstruction: `You are an expert AI assistant that generates agent specifications in JSON format.
+Given a natural language description, you must respond with ONLY valid JSON, no additional text or explanations.
 
-    setIsGenerating(true);
-    setError(null);
-
-    try {
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
-
-      const agentPrompt = `Generate a JSON object for an AI agent based on this description: "${prompt}".
-      
 The JSON should follow this schema:
 {
   "id": "unique-agent-id",
@@ -53,11 +57,77 @@ The JSON should follow this schema:
   }
 }
 
-Return ONLY valid JSON, no markdown formatting or explanation.`;
+Return ONLY valid JSON, no markdown formatting or explanation.
+You have access to conversation history and should consider previous context when generating responses.`
+        });
+        
+        const session = model.startChat({
+          history: [],
+        });
+        setChatSession(session);
+      } catch (err) {
+        console.error('Failed to initialize chat session:', err);
+      }
+    }
+  }, [apiKey]);
 
-      const result = await model.generateContent(agentPrompt);
-      const response = await result.response;
+  const handleClearHistory = () => {
+    setConversationHistory([]);
+    setGeneratedAgent(null);
+    setError(null);
+    
+    // Reinitialize chat session
+    if (apiKey) {
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({ 
+        model: 'gemini-1.5-flash',
+        systemInstruction: `You are an expert AI assistant that generates agent specifications in JSON format.`
+      });
+      setChatSession(model.startChat({ history: [] }));
+    }
+  };
+
+  const handleGenerate = async () => {
+    if (!apiKey) {
+      setError('Please enter your Gemini API key in settings');
+      setShowSettings(true);
+      return;
+    }
+
+    if (!prompt.trim()) {
+      setError('Please enter a prompt to generate an agent');
+      return;
+    }
+
+    if (!chatSession) {
+      setError('Chat session not initialized. Please check your API key.');
+      return;
+    }
+
+    setIsGenerating(true);
+    setError(null);
+
+    try {
+      // Add user message to history
+      const userMessage: ConversationMessage = {
+        role: 'user',
+        parts: prompt,
+        timestamp: new Date(),
+      };
+      setConversationHistory(prev => [...prev, userMessage]);
+
+      // Send through chat session (maintains history)
+      const result = await chatSession.sendMessage(prompt);
+      const response = result.response;
       const text = response.text();
+      
+      // Add model response to history
+      const modelMessage: ConversationMessage = {
+        role: 'model',
+        parts: text,
+        timestamp: new Date(),
+      };
+      setConversationHistory(prev => [...prev, modelMessage]);
       
       // Try to extract JSON from the response
       let jsonText = text.trim();
@@ -69,6 +139,7 @@ Return ONLY valid JSON, no markdown formatting or explanation.`;
       
       const agentData = JSON.parse(jsonText);
       setGeneratedAgent(agentData);
+      setPrompt(''); // Clear input after successful generation
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate agent');
       console.error(err);
@@ -77,7 +148,7 @@ Return ONLY valid JSON, no markdown formatting or explanation.`;
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleGenerate();
@@ -114,14 +185,25 @@ Return ONLY valid JSON, no markdown formatting or explanation.`;
         <div className="flex items-center gap-3">
           <Sparkles className="w-8 h-8 text-purple-600" />
           <h1 className="text-2xl font-bold text-gray-900">Agentia Agent Generator</h1>
+          <span className="text-sm text-gray-500 font-normal">with Conversation Memory</span>
         </div>
-        <button
-          onClick={() => setShowSettings(!showSettings)}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          title="Settings"
-        >
-          <Settings className="w-6 h-6 text-gray-600" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleClearHistory}
+            className="px-3 py-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors flex items-center gap-2"
+            title="Clear conversation history"
+          >
+            <Trash2 className="w-5 h-5" />
+            Clear History
+          </button>
+          <button
+            onClick={() => setShowSettings(!showSettings)}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            title="Settings"
+          >
+            <Settings className="w-6 h-6 text-gray-600" />
+          </button>
+        </div>
       </header>
 
       {/* Settings Panel */}
@@ -163,8 +245,8 @@ Return ONLY valid JSON, no markdown formatting or explanation.`;
             width: window.matchMedia('(min-width: 1024px)').matches ? `${leftPanelWidth}%` : '100%',
           }}
         >
-          <div className="p-6 flex-1 flex flex-col">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Describe Your Agent</h2>
+          <div className="p-6 flex-1 flex flex-col overflow-hidden">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Conversation</h2>
             
             {error && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
@@ -172,12 +254,52 @@ Return ONLY valid JSON, no markdown formatting or explanation.`;
               </div>
             )}
 
+            {/* Conversation History */}
+            <div className="flex-1 overflow-y-auto mb-4 p-4 bg-gray-50 rounded-lg">
+              {conversationHistory.length === 0 ? (
+                <div className="text-center text-gray-400 py-8">
+                  <Sparkles className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p>No conversation history yet.</p>
+                  <p className="text-sm">Start by describing an agent below.</p>
+                </div>
+              ) : (
+                <>
+                  {conversationHistory.map((msg, idx) => (
+                    <div
+                      key={`${msg.role}-${msg.timestamp.getTime()}-${idx}`}
+                      className={`mb-3 p-3 rounded-lg ${
+                        msg.role === 'user'
+                          ? 'bg-blue-100 border border-blue-200'
+                          : 'bg-white border border-gray-200'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className={`text-xs font-semibold ${
+                          msg.role === 'user' ? 'text-blue-700' : 'text-green-700'
+                        }`}>
+                          {msg.role === 'user' ? 'You' : 'Assistant'}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {msg.timestamp.toLocaleTimeString()}
+                        </span>
+                      </div>
+                      <div className="text-sm text-gray-700 whitespace-pre-wrap break-words">
+                        {msg.parts}
+                      </div>
+                    </div>
+                  ))}
+                  <div ref={historyEndRef} />
+                </>
+              )}
+            </div>
+
+            {/* Input Area */}
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="E.g., 'Create a customer support agent that can handle billing inquiries, track orders, and escalate complex issues...'"
-              className="flex-1 p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              onKeyDown={handleKeyDown}
+              placeholder="E.g., 'Create a customer support agent that can handle billing inquiries...'"
+              className="p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent h-32"
             />
 
             <button
