@@ -1,0 +1,59 @@
+{
+  "component": "IntentPanel",
+  "version": "1.0.0",
+  "lastUpdated": "2026-01-29",
+  "description": "Test suite for IntentPanel component",
+  "tests": [
+    {
+      "id": "intent-001",
+      "name": "IntentPanel renders correctly",
+      "type": "unit",
+      "steps": [
+        {
+          "action": "Mount IntentPanel component",
+          "expected": "Component renders without errors"
+        },
+        {
+          "action": "Verify panel title is displayed",
+          "expected": "Title 'Intent Panel' is visible"
+        },
+        {
+          "action": "Verify textarea is present",
+          "expected": "Textarea with placeholder is rendered"
+        }
+      ],
+      "priority": "high",
+      "status": "active"
+    },
+    {
+      "id": "intent-002",
+      "name": "Textarea accepts user input",
+      "type": "integration",
+      "steps": [
+        {
+          "action": "Type text into textarea",
+          "expected": "Text is displayed in textarea"
+        },
+        {
+          "action": "Verify state updates",
+          "expected": "Component state reflects the input"
+        }
+      ],
+      "priority": "high",
+      "status": "active"
+    },
+    {
+      "id": "intent-003",
+      "name": "Placeholder text is displayed",
+      "type": "unit",
+      "steps": [
+        {
+          "action": "Check empty textarea",
+          "expected": "Placeholder 'Enter your prompt here...' is visible"
+        }
+      ],
+      "priority": "low",
+      "status": "active"
+    }
+  ]
+}

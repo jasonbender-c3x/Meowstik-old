@@ -13,6 +13,7 @@
   border-bottom: 1px solid #334155; /* slate-700 */
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
 .logo-container {
@@ -30,6 +31,37 @@
   font-weight: 600;
   margin: 0;
   color: #f1f5f9; /* slate-100 */
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.nav-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(96, 165, 250, 0.1);
+  color: rgba(148, 163, 184, 1);
+  border: 1px solid #334155;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.nav-tab:hover {
+  background: rgba(96, 165, 250, 0.2);
+  color: #e2e8f0;
+}
+
+.nav-tab.active {
+  background: #60a5fa;
+  color: white;
+  border-color: #60a5fa;
 }
 
 .split-pane-container {
@@ -141,4 +173,17 @@
 .intent-textarea::-webkit-scrollbar-thumb:hover,
 .json-display::-webkit-scrollbar-thumb:hover {
   background: #64748b; /* slate-500 */
+}
+
+/* Evolution Center Container */
+.evolution-container {
+  flex: 1;
+  overflow: hidden;
+  background: #0f172a;
+}
+
+.evolution-center {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }

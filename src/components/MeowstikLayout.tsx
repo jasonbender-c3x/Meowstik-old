@@ -1,36 +1,16 @@
-import { useState, useEffect } from 'react';
-import { Cpu, Settings, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { Cpu, FlaskConical } from 'lucide-react';
 import { IntentPanel } from './IntentPanel';
 import { ArtifactPreview } from './ArtifactPreview';
-import { getGeminiService, ConversationMessage, AgentSpecification } from '../GeminiService';
+import { EvolutionCenter } from './EvolutionCenter';
 import './MeowstikLayout.css';
+
+type ActiveView = 'workspace' | 'evolution';
 
 export function MeowstikLayout() {
   const [dividerPosition, setDividerPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
-  const [conversationHistory, setConversationHistory] = useState<ConversationMessage[]>([]);
-  const [generatedAgent, setGeneratedAgent] = useState<AgentSpecification | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showSettings, setShowSettings] = useState(false);
-  const [apiKey, setApiKey] = useState('');
-
-  // Initialize Gemini service
-  const [geminiService, setGeminiService] = useState<ReturnType<typeof getGeminiService> | null>(null);
-
-  useEffect(() => {
-    // Check for API key in environment or localStorage
-    const storedKey = localStorage.getItem('gemini_api_key');
-    if (storedKey) {
-      setApiKey(storedKey);
-      try {
-        const service = getGeminiService();
-        setGeminiService(service);
-      } catch (err) {
-        console.error('Failed to initialize Gemini service:', err);
-      }
-    }
-  }, []);
+  const [activeView, setActiveView] = useState<ActiveView>('workspace');
 
   const handleMouseDown = () => {
     setIsDragging(true);
@@ -151,6 +131,23 @@ export function MeowstikLayout() {
             <Settings size={24} />
           </button>
         </div>
+        
+        <nav className="nav-tabs">
+          <button
+            onClick={() => setActiveView('workspace')}
+            className={`nav-tab ${activeView === 'workspace' ? 'active' : ''}`}
+          >
+            <Cpu size={18} />
+            <span>Workspace</span>
+          </button>
+          <button
+            onClick={() => setActiveView('evolution')}
+            className={`nav-tab ${activeView === 'evolution' ? 'active' : ''}`}
+          >
+            <FlaskConical size={18} />
+            <span>Evolution Center</span>
+          </button>
+        </nav>
       </header>
 
       {/* Settings Panel */}
@@ -239,29 +236,32 @@ export function MeowstikLayout() {
         </div>
       )}
       
-      <div className="split-pane-container">
-        <div 
-          className="left-pane"
-          style={{ width: `${dividerPosition}%` }}
-        >
-          <IntentPanel 
-            onSendMessage={handleSendMessage}
-            conversationHistory={conversationHistory}
+      {activeView === 'workspace' ? (
+        <div className="split-pane-container">
+          <div 
+            className="left-pane"
+            style={{ width: `${dividerPosition}%` }}
+          >
+            <IntentPanel />
+          </div>
+          
+          <div 
+            className="divider"
+            onMouseDown={handleMouseDown}
           />
+          
+          <div 
+            className="right-pane"
+            style={{ width: `${100 - dividerPosition}%` }}
+          >
+            <ArtifactPreview />
+          </div>
         </div>
-        
-        <div 
-          className="divider"
-          onMouseDown={handleMouseDown}
-        />
-        
-        <div 
-          className="right-pane"
-          style={{ width: `${100 - dividerPosition}%` }}
-        >
-          <ArtifactPreview agent={generatedAgent} />
+      ) : (
+        <div className="evolution-container">
+          <EvolutionCenter />
         </div>
-      </div>
+      )}
     </div>
   );
 }

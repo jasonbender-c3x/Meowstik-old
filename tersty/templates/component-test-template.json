@@ -1,0 +1,63 @@
+{
+  "component": "ComponentName",
+  "version": "1.0.0",
+  "lastUpdated": "YYYY-MM-DD",
+  "description": "Test suite for ComponentName",
+  "tests": [
+    {
+      "id": "test-001",
+      "name": "Component renders correctly",
+      "type": "unit",
+      "steps": [
+        {
+          "action": "Mount component",
+          "expected": "Component renders without errors"
+        },
+        {
+          "action": "Verify DOM structure",
+          "expected": "All expected elements are present"
+        }
+      ],
+      "priority": "high",
+      "status": "active"
+    },
+    {
+      "id": "test-002",
+      "name": "User interaction works as expected",
+      "type": "integration",
+      "steps": [
+        {
+          "action": "Trigger user event (click, input, etc.)",
+          "expected": "Event handler is called"
+        },
+        {
+          "action": "Verify state change",
+          "expected": "Component state updates correctly"
+        },
+        {
+          "action": "Verify UI update",
+          "expected": "UI reflects the state change"
+        }
+      ],
+      "priority": "high",
+      "status": "active"
+    },
+    {
+      "id": "test-003",
+      "name": "Error handling works correctly",
+      "type": "unit",
+      "steps": [
+        {
+          "action": "Trigger error condition",
+          "expected": "Error is caught and handled gracefully"
+        },
+        {
+          "action": "Verify error message display",
+          "expected": "User-friendly error message is shown"
+        }
+      ],
+      "priority": "medium",
+      "status": "active"
+    }
+  ]
+}
