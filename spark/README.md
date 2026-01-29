@@ -64,7 +64,7 @@ Please see the main [Contributing Guidelines](../CONTRIBUTING.md) for informatio
 
 ## Issues and Development
 
-The next 6 issues will focus on defining and implementing Spark functionality. Track progress on the [GitHub Issues](https://github.com/jasonbender-c3x/Meowstik/issues) page.
+The next 6 issues will focus on defining and implementing Spark functionality. Track progress on the [GitHub issues](https://github.com/jasonbender-c3x/Meowstik/issues) page.
 
 ---
 
