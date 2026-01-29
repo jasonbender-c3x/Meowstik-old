@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Cpu, Settings, Trash2 } from 'lucide-react';
+import { Cpu, Settings, Trash2, Database, Search } from 'lucide-react';
 import { IntentPanel } from './IntentPanel';
 import { ArtifactPreview } from './ArtifactPreview';
 import { getGeminiService, ConversationMessage, AgentSpecification } from '../GeminiService';
+import { useRAG } from '../hooks/useRAG';
 import './MeowstikLayout.css';
 
 export function MeowstikLayout() {
@@ -14,9 +15,13 @@ export function MeowstikLayout() {
   const [error, setError] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [apiKey, setApiKey] = useState('');
+  const [showRAGPanel, setShowRAGPanel] = useState(false);
 
   // Initialize Gemini service
   const [geminiService, setGeminiService] = useState<ReturnType<typeof getGeminiService> | null>(null);
+  
+  // Initialize RAG
+  const rag = useRAG(apiKey || null);
 
   useEffect(() => {
     // Check for API key in environment or localStorage
@@ -48,7 +53,10 @@ export function MeowstikLayout() {
   };
 
   const handleSendMessage = async (message: string) => {
-    if (!geminiService) {
+    // Use RAG-enhanced service if available, otherwise fall back to regular service
+    const serviceToUse = rag.geminiService || geminiService;
+    
+    if (!serviceToUse) {
       setError('Please configure your Gemini API key in settings');
       setShowSettings(true);
       return;
@@ -58,12 +66,25 @@ export function MeowstikLayout() {
     setError(null);
 
     try {
-      const agent = await geminiService.generateAgent(message);
+      let agent;
+      
+      // Use RAG-enhanced generation if available
+      if (rag.geminiService && rag.ragEnabled) {
+        agent = await rag.geminiService.generateAgentWithRAG(message, true);
+      } else {
+        agent = await serviceToUse.generateAgent(message);
+      }
+      
       setGeneratedAgent(agent);
       
       // Update conversation history from service
-      const history = geminiService.getConversationHistory();
+      const history = serviceToUse.getConversationHistory();
       setConversationHistory(history);
+      
+      // Save conversation if RAG is available
+      if (rag.isInitialized) {
+        await rag.saveConversation();
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
@@ -74,11 +95,13 @@ export function MeowstikLayout() {
   };
 
   const handleClearHistory = () => {
-    if (!geminiService) {
+    const serviceToUse = rag.geminiService || geminiService;
+    
+    if (!serviceToUse) {
       console.warn('Gemini service not initialized');
       return;
     }
-    geminiService.clearHistory();
+    serviceToUse.clearHistory();
     setConversationHistory([]);
     setGeneratedAgent(null);
     setError(null);
@@ -116,10 +139,43 @@ export function MeowstikLayout() {
             color: '#6b7280',
             fontWeight: 'normal' 
           }}>
-            with Conversation Memory
+            with RAG & Conversation Memory
           </span>
+          {rag.isInitialized && (
+            <span style={{
+              marginLeft: '0.5rem',
+              padding: '0.25rem 0.5rem',
+              backgroundColor: '#10b981',
+              color: 'white',
+              fontSize: '0.75rem',
+              borderRadius: '0.25rem',
+              fontWeight: '500',
+            }}>
+              RAG Active
+            </span>
+          )}
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          {rag.isInitialized && (
+            <button
+              onClick={() => setShowRAGPanel(!showRAGPanel)}
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: showRAGPanel ? '#4f46e5' : 'transparent',
+                color: showRAGPanel ? 'white' : '#4f46e5',
+                border: '1px solid #4f46e5',
+                borderRadius: '0.375rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+              }}
+              title="RAG Statistics"
+            >
+              <Database size={16} />
+              RAG Stats
+            </button>
+          )}
           <button
             onClick={handleClearHistory}
             style={{
@@ -209,6 +265,64 @@ export function MeowstikLayout() {
           <p style={{ fontSize: '0.75rem', color: '#dc2626', marginTop: '0.25rem', fontWeight: '500' }}>
             ⚠️ Security Notice: API keys are stored unencrypted in browser localStorage. 
             Only use this for development/testing. Do not use production API keys.
+          </p>
+        </div>
+      )}
+
+      {/* RAG Stats Panel */}
+      {showRAGPanel && rag.isInitialized && (
+        <div style={{
+          backgroundColor: '#ede9fe',
+          borderBottom: '1px solid #8b5cf6',
+          padding: '1rem 1.5rem',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+            <h3 style={{ fontSize: '0.875rem', fontWeight: '600', margin: 0 }}>
+              RAG System Statistics
+            </h3>
+            <button
+              onClick={rag.toggleRAG}
+              style={{
+                padding: '0.25rem 0.75rem',
+                backgroundColor: rag.ragEnabled ? '#10b981' : '#6b7280',
+                color: 'white',
+                border: 'none',
+                borderRadius: '0.25rem',
+                cursor: 'pointer',
+                fontSize: '0.75rem',
+              }}
+            >
+              {rag.ragEnabled ? 'Enabled' : 'Disabled'}
+            </button>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+            <div style={{ padding: '0.75rem', backgroundColor: 'white', borderRadius: '0.375rem' }}>
+              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>
+                Total Documents
+              </div>
+              <div style={{ fontSize: '1.5rem', fontWeight: '600', color: '#1f2937' }}>
+                {rag.getStats().documentCount}
+              </div>
+            </div>
+            <div style={{ padding: '0.75rem', backgroundColor: 'white', borderRadius: '0.375rem' }}>
+              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>
+                Conversations
+              </div>
+              <div style={{ fontSize: '1.5rem', fontWeight: '600', color: '#1f2937' }}>
+                {rag.getStats().conversationCount}
+              </div>
+            </div>
+            <div style={{ padding: '0.75rem', backgroundColor: 'white', borderRadius: '0.375rem' }}>
+              <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.25rem' }}>
+                Agents Indexed
+              </div>
+              <div style={{ fontSize: '1.5rem', fontWeight: '600', color: '#1f2937' }}>
+                {rag.getStats().agentCount}
+              </div>
+            </div>
+          </div>
+          <p style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.75rem' }}>
+            RAG enhances agent generation by retrieving relevant context from documentation, past conversations, and previously generated agents.
           </p>
         </div>
       )}
