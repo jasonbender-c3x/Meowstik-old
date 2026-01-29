@@ -1,33 +1,13 @@
 # Meowstik
-Agentia Compiler
-
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg)](DOCUMENTATION_INDEX.md)
-
-## Overview
-
-Meowstik is an Agentia Compiler, a specialized compiler toolchain for the Agentia programming paradigm with a TypeScript service for generating agent specifications using Google's Gemini AI API.
-
-> **Note**: This project is currently in early development. Features and documentation will be added as the project evolves.
+Agentia Compiler - AI-powered agent specification generator with strict JSON validation
 
 ## Features
 
-- 🤖 Natural language to agent specification conversion
-- 📝 Enforced JSON output format
-- 🔑 Environment variable based API key management
-- 🛡️ Type-safe TypeScript implementation
-- ⚡ Simple and easy-to-use API
-- 🎨 IDE Layout with split-pane interface
-
-## Sub-Projects
-
-Meowstik is organized into several sub-projects, each focusing on specific aspects of the compiler toolchain:
-
-| Sub-Project | Description | Status |
-|-------------|-------------|--------|
-| [**Spark**](spark/README.md) | Web app prototyping & development tool with live preview pane - Node.js, React/Vue editor similar to Gemini canvas | 🚧 In Development |
-
-> More sub-projects will be added as the Meowstik ecosystem grows.
+- 🤖 **Gemini 1.5 Flash Integration**: Uses Google's latest Gemini 1.5 Flash model for agent generation
+- ✅ **Strict JSON Validation**: Enforces `application/json` MIME type for guaranteed JSON responses
+- 🛡️ **Runtime Validation**: Uses Zod schemas to validate generated specifications
+- 🎯 **Type Safety**: Full TypeScript support with exported types
+- ⚠️ **Custom Error Handling**: Typed `MeowstikGenerationError` for better error handling
 
 ## Installation
 
@@ -35,69 +15,131 @@ Meowstik is organized into several sub-projects, each focusing on specific aspec
 npm install
 ```
 
-## Configuration
+## Dependencies
 
-1. Copy the example environment file:
+- `@google/generative-ai` - Google Generative AI SDK
+- `zod` - TypeScript-first schema validation
+
+## Setup
+
+1. Set your Gemini API key as an environment variable:
+   ```bash
+   export GEMINI_API_KEY="your-api-key-here"
+   ```
+
+2. Build the project:
+   ```bash
+   npm run build
+   ```
+
+## Usage
+
+### Basic Usage
+
+```typescript
+import { generateAgentSpec, MeowstikGenerationError } from 'meowstik';
+
+async function example() {
+  try {
+    const prompt = `Generate an agent specification for a data analysis agent with capabilities including data processing, visualization, and statistical analysis.`;
+    
+    const agentSpec = await generateAgentSpec(prompt);
+    console.log(agentSpec);
+    // Output: { name: "...", description: "...", capabilities: [...], parameters: {...} }
+  } catch (error) {
+    if (error instanceof MeowstikGenerationError) {
+      console.error('Generation failed:', error.message);
+    }
+  }
+}
+```
+
+### Agent Schema
+
+The generated agent specification conforms to the following schema:
+
+```typescript
+{
+  name: string;           // Agent name
+  description: string;    // Agent description
+  capabilities: string[]; // Array of agent capabilities
+  parameters?: Record<string, any>; // Optional parameters
+}
+```
+
+### Error Handling
+
+The service throws a typed `MeowstikGenerationError` for any failures:
+
+- Missing API key
+- JSON parsing errors
+- Schema validation failures
+- API errors
+
+```typescript
+try {
+  const spec = await generateAgentSpec(prompt);
+} catch (error) {
+  if (error instanceof MeowstikGenerationError) {
+    console.error(error.message);
+    console.error(error.cause); // Original error if available
+  }
+}
+```
+
+## Running the Example
+
 ```bash
-cp .env.example .env
+npm run build
+node dist/services/example.js
 ```
 
-2. Add your Google Gemini API key to `.env`:
-```env
-GEMINI_API_KEY=your_actual_api_key_here
-```
+## API Reference
 
-Get your API key from: https://ai.google.dev/
+### `generateAgentSpec(prompt: string): Promise<AgentSpec>`
+
+Generates an agent specification using Gemini 1.5 Flash with strict JSON output.
+
+**Parameters:**
+- `prompt` (string): The prompt to generate the agent specification
+
+**Returns:**
+- `Promise<AgentSpec>`: A validated agent specification
+
+**Throws:**
+- `MeowstikGenerationError`: If generation or validation fails
+
+### `AgentSchema`
+
+Zod schema used for runtime validation of generated agent specifications.
+
+### `MeowstikGenerationError`
+
+Custom error class for generation failures. Includes:
+- `message`: Error description
+- `cause`: Original error if available
 
 ## Development
 
-Run development server:
-```bash
-npm run dev
-```
+### Build
 
-Build for production:
 ```bash
 npm run build
 ```
 
-## IDE Layout
+### Project Structure
 
-The Meowstik IDE features a split-pane layout:
-- **Left Pane (Intent Panel)**: Textarea for entering prompts
-- **Right Pane (Artifact Preview)**: Renders JSON cards
-- **Resizable Divider**: Drag to adjust pane sizes
-
-The interface uses a VS Code-inspired dark theme with slate-900 backgrounds.
-
-## Documentation
-
-For comprehensive documentation, please refer to:
-
-- [Documentation Index](DOCUMENTATION_INDEX.md) - Complete guide to all project documentation
-- [Contributing Guidelines](CONTRIBUTING.md) - How to contribute to this project
-- [API Reference](docs/api/README.md) - API documentation (coming soon)
-- [Architecture](docs/architecture/README.md) - System architecture details (coming soon)
-
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details on how to:
-
-- Report bugs
-- Suggest features
-- Submit pull requests
-- Follow coding standards
+```
+Meowstik/
+├── services/
+│   ├── MeowstikAI.ts    # Main service implementation
+│   └── example.ts       # Usage example
+├── index.ts             # Main exports
+├── tsconfig.json        # TypeScript configuration
+└── package.json         # Package configuration
+```
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+ISC
 
-## Contact
-
-- **Project Owner**: Jason Bender
-- **Email**: jason@oceanshorestech.com
-- **Repository**: [jasonbender-c3x/Meowstik](https://github.com/jasonbender-c3x/Meowstik)
-
----
-
-*Last Updated: January 29, 2026*
