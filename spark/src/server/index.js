@@ -51,6 +51,8 @@ app.use('/api/*', (req, res) => {
 });
 
 // Serve the main application (catch-all for SPA)
+// Note: Rate limiting should be added in production
+// TODO: Add rate limiting middleware (e.g., express-rate-limit)
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../../public/index.html'));
 });

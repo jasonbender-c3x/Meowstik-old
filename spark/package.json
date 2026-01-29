@@ -33,6 +33,9 @@
   "devDependencies": {
     "nodemon": "^3.0.0"
   },
+  "futureEnhancements": {
+    "rateLimit": "express-rate-limit - to be added for production security"
+  },
   "nodemonConfig": {
     "watch": ["src"],
     "ext": "js,json",
