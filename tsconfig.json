@@ -13,6 +13,6 @@
     "declaration": true,
     "sourceMap": true
   },
-  "include": ["services/**/*"],
+  "include": ["services/**/*", "index.ts"],
   "exclude": ["node_modules", "dist"]
 }
