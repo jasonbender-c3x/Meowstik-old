@@ -1,0 +1,109 @@
+{
+  "component": "AgentGenerator",
+  "version": "1.0.0",
+  "lastUpdated": "2026-01-29",
+  "description": "Test suite for AgentGenerator component",
+  "tests": [
+    {
+      "id": "agent-001",
+      "name": "AgentGenerator renders correctly",
+      "type": "unit",
+      "steps": [
+        {
+          "action": "Mount AgentGenerator component",
+          "expected": "Component renders without errors"
+        },
+        {
+          "action": "Verify header with title",
+          "expected": "Header shows 'Agentia Agent Generator'"
+        },
+        {
+          "action": "Verify settings button",
+          "expected": "Settings button is visible"
+        }
+      ],
+      "priority": "high",
+      "status": "active"
+    },
+    {
+      "id": "agent-002",
+      "name": "Settings panel toggles correctly",
+      "type": "integration",
+      "steps": [
+        {
+          "action": "Click settings button",
+          "expected": "Settings panel becomes visible"
+        },
+        {
+          "action": "Click settings button again",
+          "expected": "Settings panel is hidden"
+        }
+      ],
+      "priority": "medium",
+      "status": "active"
+    },
+    {
+      "id": "agent-003",
+      "name": "Agent generation works with valid API key",
+      "type": "integration",
+      "steps": [
+        {
+          "action": "Enter valid API key",
+          "expected": "API key is stored"
+        },
+        {
+          "action": "Enter agent prompt",
+          "expected": "Prompt text is captured"
+        },
+        {
+          "action": "Click Generate Agent button",
+          "expected": "Loading state is shown"
+        },
+        {
+          "action": "Wait for generation",
+          "expected": "Agent is generated and displayed"
+        }
+      ],
+      "priority": "high",
+      "status": "active"
+    },
+    {
+      "id": "agent-004",
+      "name": "Error handling for missing API key",
+      "type": "unit",
+      "steps": [
+        {
+          "action": "Click Generate without API key",
+          "expected": "Error message is displayed"
+        },
+        {
+          "action": "Verify settings panel opens",
+          "expected": "Settings panel is automatically opened"
+        }
+      ],
+      "priority": "high",
+      "status": "active"
+    },
+    {
+      "id": "agent-005",
+      "name": "View mode toggle works",
+      "type": "integration",
+      "steps": [
+        {
+          "action": "Generate an agent",
+          "expected": "Agent is displayed in preview mode"
+        },
+        {
+          "action": "Click Code view button",
+          "expected": "JSON code is displayed"
+        },
+        {
+          "action": "Click Preview button",
+          "expected": "Agent card preview is shown"
+        }
+      ],
+      "priority": "medium",
+      "status": "active"
+    }
+  ]
+}

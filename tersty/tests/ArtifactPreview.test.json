@@ -1,0 +1,42 @@
+{
+  "component": "ArtifactPreview",
+  "version": "1.0.0",
+  "lastUpdated": "2026-01-29",
+  "description": "Test suite for ArtifactPreview component",
+  "tests": [
+    {
+      "id": "artifact-001",
+      "name": "ArtifactPreview renders correctly",
+      "type": "unit",
+      "steps": [
+        {
+          "action": "Mount ArtifactPreview component",
+          "expected": "Component renders without errors"
+        },
+        {
+          "action": "Verify panel title is displayed",
+          "expected": "Title 'Artifact Preview' is visible"
+        }
+      ],
+      "priority": "high",
+      "status": "active"
+    },
+    {
+      "id": "artifact-002",
+      "name": "Preview content displays correctly",
+      "type": "integration",
+      "steps": [
+        {
+          "action": "Pass artifact data to component",
+          "expected": "Artifact content is rendered"
+        },
+        {
+          "action": "Verify formatting",
+          "expected": "Content is properly formatted and styled"
+        }
+      ],
+      "priority": "high",
+      "status": "active"
+    }
+  ]
+}

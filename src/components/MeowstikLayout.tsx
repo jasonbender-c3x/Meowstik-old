@@ -1,12 +1,16 @@
 import { useState } from 'react';
-import { Cpu } from 'lucide-react';
+import { Cpu, FlaskConical } from 'lucide-react';
 import { IntentPanel } from './IntentPanel';
 import { ArtifactPreview } from './ArtifactPreview';
+import { EvolutionCenter } from './EvolutionCenter';
 import './MeowstikLayout.css';
+
+type ActiveView = 'workspace' | 'evolution';
 
 export function MeowstikLayout() {
   const [dividerPosition, setDividerPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
+  const [activeView, setActiveView] = useState<ActiveView>('workspace');
 
   const handleMouseDown = () => {
     setIsDragging(true);
@@ -35,28 +39,51 @@ export function MeowstikLayout() {
           <Cpu className="logo-icon" size={32} />
           <h1 className="logo-text">Meowstik</h1>
         </div>
+        
+        <nav className="nav-tabs">
+          <button
+            onClick={() => setActiveView('workspace')}
+            className={`nav-tab ${activeView === 'workspace' ? 'active' : ''}`}
+          >
+            <Cpu size={18} />
+            <span>Workspace</span>
+          </button>
+          <button
+            onClick={() => setActiveView('evolution')}
+            className={`nav-tab ${activeView === 'evolution' ? 'active' : ''}`}
+          >
+            <FlaskConical size={18} />
+            <span>Evolution Center</span>
+          </button>
+        </nav>
       </header>
       
-      <div className="split-pane-container">
-        <div 
-          className="left-pane"
-          style={{ width: `${dividerPosition}%` }}
-        >
-          <IntentPanel />
+      {activeView === 'workspace' ? (
+        <div className="split-pane-container">
+          <div 
+            className="left-pane"
+            style={{ width: `${dividerPosition}%` }}
+          >
+            <IntentPanel />
+          </div>
+          
+          <div 
+            className="divider"
+            onMouseDown={handleMouseDown}
+          />
+          
+          <div 
+            className="right-pane"
+            style={{ width: `${100 - dividerPosition}%` }}
+          >
+            <ArtifactPreview />
+          </div>
         </div>
-        
-        <div 
-          className="divider"
-          onMouseDown={handleMouseDown}
-        />
-        
-        <div 
-          className="right-pane"
-          style={{ width: `${100 - dividerPosition}%` }}
-        >
-          <ArtifactPreview />
+      ) : (
+        <div className="evolution-container">
+          <EvolutionCenter />
         </div>
-      </div>
+      )}
     </div>
   );
 }
