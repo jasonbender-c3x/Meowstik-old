@@ -36,10 +36,13 @@ Get your API key from: https://ai.google.dev/
 ### Basic Usage
 
 ```typescript
-import { geminiService } from './src/GeminiService.js';
+import { getGeminiService } from './src/GeminiService.js';
+
+// Get the singleton service instance
+const service = getGeminiService();
 
 // Generate an agent from a natural language prompt
-const agent = await geminiService.generateAgent(
+const agent = await service.generateAgent(
   'Create an agent that monitors system health and sends alerts'
 );
 
@@ -55,23 +58,63 @@ const service = new GeminiService();
 const agent = await service.generateAgent('Your prompt here');
 ```
 
+### Using Factory Function
+
+```typescript
+import { createGeminiService } from './src/GeminiService.js';
+
+// Create with environment variable
+const service1 = createGeminiService();
+
+// Create with explicit API key
+const service2 = createGeminiService('your-api-key');
+```
+
 ## API Reference
 
 ### `GeminiService`
 
-#### `constructor()`
-Creates a new instance of the GeminiService. Reads the `GEMINI_API_KEY` from environment variables.
+#### `constructor(apiKey?: string)`
+Creates a new instance of the GeminiService.
 
-Throws an error if `GEMINI_API_KEY` is not set.
+**Parameters:**
+- `apiKey` (optional): Google Gemini API key. If not provided, reads from `GEMINI_API_KEY` environment variable.
 
-#### `generateAgent(prompt: string): Promise<object>`
+Throws an error if no API key is available.
+
+#### `generateAgent(prompt: string): Promise<AgentSpecification>`
 Generates an agent specification from a natural language prompt.
 
 **Parameters:**
-- `prompt`: A natural language description of the desired agent
+- `prompt`: A natural language description of the desired agent (max 10,000 characters)
 
 **Returns:**
-- A Promise that resolves to a JSON object containing the agent specification
+- A Promise that resolves to an `AgentSpecification` object
+
+**Throws:**
+- Error if prompt is empty, too long, or if API call fails
+
+#### Helper Functions
+
+##### `getGeminiService(): GeminiService`
+Returns the singleton instance of GeminiService (lazy initialization).
+
+##### `createGeminiService(apiKey?: string): GeminiService`
+Factory function to create a new GeminiService instance.
+
+**Parameters:**
+- `apiKey` (optional): Google Gemini API key
+
+#### Type: `AgentSpecification`
+
+```typescript
+interface AgentSpecification {
+  name: string;
+  description: string;
+  capabilities: string[];
+  parameters: Record<string, any>;
+}
+```
 
 **Example Response:**
 ```json

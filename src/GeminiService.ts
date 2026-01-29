@@ -1,29 +1,40 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
 import * as dotenv from 'dotenv';
 
 // Load environment variables
 dotenv.config();
 
 /**
+ * Interface defining the structure of an agent specification
+ */
+export interface AgentSpecification {
+  name: string;
+  description: string;
+  capabilities: string[];
+  parameters: Record<string, any>;
+}
+
+/**
  * Service for interacting with Google's Gemini AI API
  * Provides functionality to generate agent specifications from natural language prompts
  */
 export class GeminiService {
-  private genAI: GoogleGenerativeAI;
-  private model: any;
+  private genAI: GoogleGenerativeAI | null = null;
+  private model: GenerativeModel | null = null;
 
-  constructor() {
-    const apiKey = process.env.GEMINI_API_KEY;
+  constructor(apiKey?: string) {
+    const key = apiKey || process.env.GEMINI_API_KEY;
     
-    if (!apiKey) {
-      throw new Error('GEMINI_API_KEY environment variable is not set');
+    if (!key) {
+      throw new Error('GEMINI_API_KEY must be provided or set as an environment variable');
     }
 
-    this.genAI = new GoogleGenerativeAI(apiKey);
+    this.genAI = new GoogleGenerativeAI(key);
     
     // Initialize the model with JSON response formatting
+    // Using gemini-1.5-flash for faster responses, can be configured for gemini-1.5-pro
     this.model = this.genAI.getGenerativeModel({
-      model: 'gemini-pro',
+      model: 'gemini-1.5-flash',
       generationConfig: {
         temperature: 0.7,
         topK: 40,
@@ -36,9 +47,21 @@ export class GeminiService {
   /**
    * Generate an agent specification from a natural language prompt
    * @param prompt - The natural language description of the desired agent
-   * @returns Promise<object> - The generated agent specification as a JSON object
+   * @returns Promise<AgentSpecification> - The generated agent specification as a JSON object
    */
-  async generateAgent(prompt: string): Promise<object> {
+  async generateAgent(prompt: string): Promise<AgentSpecification> {
+    // Validate input
+    if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
+      throw new Error('Prompt must be a non-empty string');
+    }
+
+    if (prompt.length > 10000) {
+      throw new Error('Prompt exceeds maximum length of 10000 characters');
+    }
+
+    if (!this.model) {
+      throw new Error('GeminiService is not properly initialized');
+    }
     try {
       // System instruction to enforce JSON output
       const systemInstruction = `You are an expert AI assistant that generates agent specifications in JSON format.
@@ -65,15 +88,17 @@ Always respond with valid JSON only. Do not include markdown code blocks or any 
       const text = response.text();
 
       // Parse the JSON response
-      let jsonResponse: object;
+      let jsonResponse: AgentSpecification;
       try {
         // Try to extract JSON from the response (in case it's wrapped in code blocks)
-        const jsonMatch = text.match(/```(?:json)?\s*(\{[\s\S]*\})\s*```/);
+        const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
         const jsonText = jsonMatch ? jsonMatch[1] : text.trim();
         
-        jsonResponse = JSON.parse(jsonText);
+        jsonResponse = JSON.parse(jsonText) as AgentSpecification;
       } catch (parseError) {
-        throw new Error(`Failed to parse JSON response: ${text}`);
+        // Truncate error message to avoid exposing large responses
+        const truncatedText = text.length > 200 ? text.substring(0, 200) + '...' : text;
+        throw new Error(`Failed to parse JSON response. Response preview: ${truncatedText}`);
       }
 
       return jsonResponse;
@@ -85,14 +110,27 @@ Always respond with valid JSON only. Do not include markdown code blocks or any 
     }
   }
 
-  /**
-   * Get the underlying Gemini AI client
-   * @returns GoogleGenerativeAI - The initialized Gemini AI client
-   */
-  getClient(): GoogleGenerativeAI {
-    return this.genAI;
-  }
 }
 
-// Export a singleton instance for convenience
-export const geminiService = new GeminiService();
+/**
+ * Create a GeminiService instance with lazy initialization
+ * @param apiKey - Optional API key, defaults to GEMINI_API_KEY environment variable
+ * @returns GeminiService instance
+ */
+export function createGeminiService(apiKey?: string): GeminiService {
+  return new GeminiService(apiKey);
+}
+
+// Lazy singleton instance - only created when accessed
+let _geminiServiceInstance: GeminiService | null = null;
+
+/**
+ * Get or create the singleton GeminiService instance
+ * @returns GeminiService instance
+ */
+export function getGeminiService(): GeminiService {
+  if (!_geminiServiceInstance) {
+    _geminiServiceInstance = new GeminiService();
+  }
+  return _geminiServiceInstance;
+}

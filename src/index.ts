@@ -1,1 +1,1 @@
-export { GeminiService, geminiService } from './GeminiService.js';
+export { GeminiService, AgentSpecification, createGeminiService, getGeminiService } from './GeminiService.js';
