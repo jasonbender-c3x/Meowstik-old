@@ -8,6 +8,7 @@
 ## Table of Contents
 
 - [Overview](#overview)
+- [Sub-Projects](#sub-projects)
 - [Features](#features)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
@@ -23,6 +24,16 @@
 Meowstik is an Agentia Compiler, a specialized compiler toolchain for the Agentia programming paradigm.
 
 > **Note**: This project is currently in early development. Features and documentation will be added as the project evolves.
+
+## Sub-Projects
+
+Meowstik is organized into several sub-projects, each focusing on specific aspects of the compiler toolchain:
+
+| Sub-Project | Description | Status |
+|-------------|-------------|--------|
+| [**Spark**](spark/README.md) | [To be defined - next 6 issues] | 🚧 In Development |
+
+> More sub-projects will be added as the Meowstik ecosystem grows.
 
 ## Features
 

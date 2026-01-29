@@ -39,6 +39,12 @@ This project is in early development. Documentation will be continuously updated
 | [docs/user-guide/configuration.md](docs/user-guide/configuration.md) | 🔄 Coming Soon | Configuration options and best practices |
 | [docs/user-guide/troubleshooting.md](docs/user-guide/troubleshooting.md) | 🔄 Coming Soon | Common issues and solutions |
 
+### Sub-Projects
+
+| Sub-Project | Documentation | Status | Description |
+|-------------|---------------|--------|-------------|
+| [Spark](spark/README.md) | [Spark Docs](spark/docs/README.md) | 🚧 In Development | Spark sub-project documentation |
+
 ---
 
 ## 🚀 Quick Links
