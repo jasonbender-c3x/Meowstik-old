@@ -2,11 +2,13 @@
 
 ## Overview
 
-This document describes the conversation history (short-term memory) implementation in Meowstik and provides guidance on implementing RAG (Retrieval Augmented Generation) capabilities.
+This document describes the conversation history (short-term memory) and RAG (Retrieval Augmented Generation) implementation in Meowstik.
 
 ## Current Implementation
 
 ### Conversation History (Short-Term Memory) ✅
+
+**Status: IMPLEMENTED**
 
 The application now implements proper conversation history using Google Gemini's chat sessions:
 
@@ -58,18 +60,106 @@ const result = await chatSession.sendMessage(userPrompt);
 - ✅ **Iterative Refinement**: Users can refine agents based on previous generations
 - ✅ **History Tracking**: Full conversation history available for review
 
-## Future Implementation: RAG (Retrieval Augmented Generation) 🚧
+### RAG (Retrieval Augmented Generation) ✅
 
-RAG is not currently implemented but can be added to provide:
-- Long-term memory across sessions
-- Knowledge base integration
-- Document retrieval and context injection
+**Status: IMPLEMENTED** (January 2026)
 
-### Recommended RAG Architecture
+Meowstik now includes a complete RAG implementation that provides:
+- **Long-term memory** across sessions
+- **Semantic search** over conversations, agents, and documentation
+- **Context injection** into agent generation prompts
+- **Persistent storage** using browser localStorage
 
-#### 1. Vector Database Integration
+#### Key Components
 
-Choose a vector database for semantic search:
+1. **RAGService** (`src/services/RAGService.ts`)
+   - Google embedding API integration (text-embedding-004)
+   - Vector similarity search (cosine similarity)
+   - Document management and filtering
+   - Batch document processing
+
+2. **StorageService** (`src/services/StorageService.ts`)
+   - Browser localStorage persistence
+   - User ID tracking and profiles
+   - Conversation history storage
+   - Agent specification storage
+   - Data export/import capabilities
+
+3. **IngestionService** (`src/services/IngestionService.ts`)
+   - Markdown document processing and chunking
+   - Conversation history indexing
+   - Agent specification indexing
+   - User note management
+
+4. **EnhancedGeminiService** (`src/services/EnhancedGeminiService.ts`)
+   - Extends base GeminiService with RAG
+   - Context retrieval and injection
+   - Agent search and discovery
+   - Conversation search
+
+5. **useRAG Hook** (`src/hooks/useRAG.ts`)
+   - React integration for RAG functionality
+   - Automatic initialization
+   - State management
+   - Stats and search utilities
+
+6. **UI Integration** (`src/components/MeowstikLayout.tsx`)
+   - RAG status indicator
+   - Statistics panel
+   - Toggle controls
+   - Automatic conversation saving
+
+#### How RAG Works in Meowstik
+
+```typescript
+// When generating an agent:
+// 1. User enters prompt
+const userPrompt = "Create a customer support agent";
+
+// 2. System retrieves relevant context
+const context = await ragService.retrieveRelevantDocuments(userPrompt, 5);
+// Returns: [similar agents, relevant conversations, documentation]
+
+// 3. Context is injected into prompt
+const enhancedPrompt = `
+  Previous relevant context:
+  ${context.map(doc => doc.content).join('\n\n')}
+  
+  User request: ${userPrompt}
+`;
+
+// 4. Gemini generates agent with full context
+const agent = await generateAgent(enhancedPrompt);
+
+// 5. New agent is automatically indexed
+await ingestionService.ingestAgent(agent, userId);
+```
+
+#### What Gets Indexed
+
+- ✅ **Documentation**: All markdown files in the project
+- ✅ **Conversations**: User-model conversation turns
+- ✅ **Agents**: All generated agent specifications
+- ✅ **Example Agents**: Pre-seeded examples for bootstrapping
+
+#### Benefits of RAG
+
+- ✅ **Context Awareness**: Agent generation informed by past interactions
+- ✅ **Consistency**: Similar prompts leverage previous successful agents
+- ✅ **Learning**: System improves with usage
+- ✅ **Discovery**: Search past agents and conversations
+- ✅ **Documentation Access**: Built-in knowledge of project docs
+
+## Detailed Documentation
+
+For comprehensive details on the RAG implementation, see:
+- [RAG Implementation Guide](./RAG_IMPLEMENTATION.md) - Complete RAG documentation
+
+## Legacy RAG Architecture Notes
+
+Below are the original architectural recommendations that informed the implementation:
+
+### Vector Database Integration (Implemented as In-Memory)
 
 ```typescript
 // Example with ChromaDB, Pinecone, or similar

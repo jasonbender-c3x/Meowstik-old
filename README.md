@@ -1,7 +1,23 @@
 # Meowstik
-Agentia Compiler
+Agentia Compiler with RAG-Enhanced Agent Generation
 
 ## Features
+
+### 🤖 AI-Powered Agent Generation
+Generate structured AI agent specifications from natural language descriptions using Google's Gemini API.
+
+### 🧠 RAG (Retrieval-Augmented Generation)
+**NEW!** Enhanced agent generation with semantic search across:
+- Previous conversation history
+- Generated agent specifications  
+- Documentation and examples
+- User notes
+
+Benefits:
+- **Context-Aware**: Leverages past interactions for better results
+- **Consistent**: Similar prompts use successful previous agents as reference
+- **Persistent**: All conversations and agents are indexed for future use
+- **Discoverable**: Search through all past generations
 
 ### 🔐 Secure File System Bridge
 Persist agents to disk using the browser's native File System Access API with the `useLocalRepo` React hook.
@@ -36,6 +52,8 @@ function MyComponent() {
 
 #### Documentation
 - [Hook Documentation](./src/hooks/README.md) - Complete API reference and examples
+- [RAG Implementation](./docs/RAG_IMPLEMENTATION.md) - RAG system documentation
+- [Memory & RAG Guide](./docs/MEMORY_AND_RAG.md) - Memory architecture overview
 - [Implementation Summary](./IMPLEMENTATION_SUMMARY.md) - Technical details and security features
 - [Example Component](./src/AgentPersistenceExample.tsx) - Full working example
 
