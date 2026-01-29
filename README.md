@@ -31,7 +31,7 @@ Meowstik is organized into several sub-projects, each focusing on specific aspec
 
 | Sub-Project | Description | Status |
 |-------------|-------------|--------|
-| [**Spark**](spark/README.md) | [To be defined - next 6 issues] | 🚧 In Development |
+| [**Spark**](spark/README.md) | Web app prototyping & development tool with live preview pane - Node.js, React/Vue editor similar to Gemini canvas | 🚧 In Development |
 
 > More sub-projects will be added as the Meowstik ecosystem grows.
 
