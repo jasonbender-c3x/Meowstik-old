@@ -114,9 +114,9 @@ The File System Access API is supported in:
 - Chrome/Edge 86+
 - Opera 72+
 
-**Note**: This API is not available in:
-- Firefox (as of 2024)
-- Safari (as of 2024)
+**Note**: As of early 2026, this API still has limited support in:
+- Firefox: Behind a flag, not enabled by default
+- Safari: Not supported
 
 For production use, always check for API availability and provide fallback mechanisms.
 
@@ -130,6 +130,7 @@ For production use, always check for API availability and provide fallback mecha
 ## Example: Complete Agent Persistence
 
 ```typescript
+import React from 'react';
 import { useLocalRepo } from './hooks/useLocalRepo';
 
 interface Agent {
@@ -140,7 +141,7 @@ interface Agent {
 
 function AgentPersistence() {
   const { directoryHandle, connect, saveAgent, error } = useLocalRepo();
-  const [agents, setAgents] = useState<Agent[]>([]);
+  const [agents, setAgents] = React.useState<Agent[]>([]);
 
   const handleSaveAllAgents = async () => {
     if (!directoryHandle) {

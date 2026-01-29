@@ -26,6 +26,8 @@ interface FileSystemDirectoryHandle {
   getDirectoryHandle(name: string, options?: FileSystemGetDirectoryOptions): Promise<FileSystemDirectoryHandle>;
   removeEntry(name: string, options?: { recursive?: boolean }): Promise<void>;
   resolve(possibleDescendant: FileSystemHandle): Promise<string[] | null>;
+  queryPermission(descriptor?: FileSystemHandlePermissionDescriptor): Promise<PermissionState>;
+  requestPermission(descriptor?: FileSystemHandlePermissionDescriptor): Promise<PermissionState>;
   values(): AsyncIterableIterator<FileSystemHandle>;
   keys(): AsyncIterableIterator<string>;
   entries(): AsyncIterableIterator<[string, FileSystemHandle]>;

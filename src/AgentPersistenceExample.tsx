@@ -16,6 +16,7 @@ export function AgentPersistenceExample() {
     version: '1.0.0',
     description: 'An example agent configuration',
   }, null, 2));
+  const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
 
   const handleConnect = async () => {
     await connect();
@@ -23,15 +24,18 @@ export function AgentPersistenceExample() {
 
   const handleSave = async () => {
     if (!agentName.trim()) {
-      alert('Please enter a file name');
+      setSuccessMessage(null);
       return;
     }
 
     try {
       const fileName = agentName.endsWith('.json') ? agentName : `${agentName}.json`;
       await saveAgent(fileName, agentContent);
-      alert(`Agent saved successfully as ${fileName}!`);
+      setSuccessMessage(`Agent saved successfully as ${fileName}!`);
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
+      setSuccessMessage(null);
       console.error('Failed to save agent:', err);
     }
   };
@@ -111,6 +115,21 @@ export function AgentPersistenceExample() {
           >
             💾 Save Agent
           </button>
+        </div>
+      )}
+
+      {successMessage && (
+        <div 
+          style={{
+            marginTop: '20px',
+            padding: '10px',
+            backgroundColor: '#e8f5e9',
+            color: '#2e7d32',
+            borderRadius: '4px',
+            border: '1px solid #4caf50',
+          }}
+        >
+          <strong>Success:</strong> {successMessage}
         </div>
       )}
 

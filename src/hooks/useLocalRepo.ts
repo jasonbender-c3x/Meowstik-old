@@ -68,23 +68,30 @@ export function useLocalRepo(): UseLocalRepoReturn {
         throw new Error('No directory connected. Call connect() first.');
       }
 
+      // Validate fileName to prevent path traversal attacks
+      if (!fileName || fileName.trim() === '') {
+        throw new Error('File name cannot be empty');
+      }
+      if (fileName.includes('/') || fileName.includes('\\')) {
+        throw new Error('File name cannot contain directory separators');
+      }
+      if (fileName.includes('..')) {
+        throw new Error('File name cannot contain path traversal sequences');
+      }
+
       // Get or create file handle
       const fileHandle = await directoryHandle.getFileHandle(fileName, { create: true });
-
-      // Request permission if needed
-      const permission = await fileHandle.queryPermission({ mode: 'readwrite' });
-      if (permission === 'denied') {
-        throw new Error('Permission to write file was denied');
-      }
 
       // Create writable stream
       const writable = await fileHandle.createWritable();
 
-      // Write content to file
-      await writable.write(content);
-
-      // Close the stream
-      await writable.close();
+      try {
+        // Write content to file
+        await writable.write(content);
+      } finally {
+        // Always close the stream, even if write fails
+        await writable.close();
+      }
     } catch (err) {
       // Handle permission denial and other errors
       if (err instanceof Error) {
