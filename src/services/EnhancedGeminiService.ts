@@ -2,6 +2,7 @@ import { GeminiService, AgentSpecification } from '../GeminiService';
 import type { RAGService, SearchResult } from './RAGService';
 import type { StorageService } from './StorageService';
 import type { IngestionService } from './IngestionService';
+import type { RetrievalOrchestrator, OrchestratedResult } from './RetrievalOrchestrator';
 
 /**
  * Enhanced Gemini Service with RAG capabilities
@@ -11,6 +12,7 @@ export class EnhancedGeminiService extends GeminiService {
   private ragService: RAGService | null = null;
   private storageService: StorageService | null = null;
   private ingestionService: IngestionService | null = null;
+  private retrievalOrchestrator: RetrievalOrchestrator | null = null;
   private ragEnabled: boolean = true;
   private userId: string = 'default_user';
 
@@ -19,19 +21,30 @@ export class EnhancedGeminiService extends GeminiService {
    * @param ragService - RAG service instance
    * @param storageService - Storage service instance
    * @param ingestionService - Ingestion service instance
+   * @param retrievalOrchestrator - Optional retrieval orchestrator instance
    */
   async enableRAG(
     ragService: RAGService,
     storageService: StorageService,
-    ingestionService: IngestionService
+    ingestionService: IngestionService,
+    retrievalOrchestrator?: RetrievalOrchestrator
   ): Promise<void> {
     this.ragService = ragService;
     this.storageService = storageService;
     this.ingestionService = ingestionService;
+    this.retrievalOrchestrator = retrievalOrchestrator || null;
     this.userId = storageService.getUserId();
     
     // Load and ingest existing data (await to ensure completion)
     await this.loadAndIngestPersistedData();
+  }
+
+  /**
+   * Set the retrieval orchestrator
+   * @param orchestrator - Retrieval orchestrator instance
+   */
+  setRetrievalOrchestrator(orchestrator: RetrievalOrchestrator): void {
+    this.retrievalOrchestrator = orchestrator;
   }
 
   /**
@@ -85,16 +98,35 @@ export class EnhancedGeminiService extends GeminiService {
 
   /**
    * Retrieve relevant context for a query
+   * Uses RetrievalOrchestrator if available, otherwise falls back to basic RAG
    * @param query - User query
    * @param topK - Number of results to retrieve
-   * @returns Promise<SearchResult[]> - Retrieved context
+   * @returns Promise<SearchResult[] | OrchestratedResult> - Retrieved context
    */
-  async retrieveContext(query: string, topK: number = 5): Promise<SearchResult[]> {
+  async retrieveContext(query: string, topK: number = 5): Promise<SearchResult[] | OrchestratedResult> {
     if (!this.isRAGAvailable() || !this.ragService) {
       return [];
     }
 
     try {
+      // Use orchestrator if available for enhanced retrieval
+      if (this.retrievalOrchestrator) {
+        const result = await this.retrievalOrchestrator.retrieve(query);
+        
+        // Log security warnings
+        if (!result.securityCheck.isSafe) {
+          console.warn('Security check failed:', result.securityCheck.threats);
+        }
+        
+        // Log entity recognition
+        if (result.entities.length > 0) {
+          console.log('Detected entities:', result.entities.map(e => `${e.type}:${e.text}`).join(', '));
+        }
+        
+        return result;
+      }
+      
+      // Fallback to basic RAG
       return await this.ragService.retrieveRelevantDocuments(query, topK, {
         userId: this.userId,
       });
@@ -120,7 +152,40 @@ export class EnhancedGeminiService extends GeminiService {
     if (useRAG && this.isRAGAvailable()) {
       const context = await this.retrieveContext(prompt, 5);
 
-      if (context.length > 0) {
+      // Handle orchestrated results
+      if (context && typeof context === 'object' && 'documents' in context) {
+        const orchestratedResult = context as OrchestratedResult;
+        
+        if (orchestratedResult.documents.length > 0) {
+          const contextText = orchestratedResult.documents
+            .map((result, idx) => {
+              const doc = result.document;
+              return `
+Context ${idx + 1} (Relevance: ${(result.similarity * 100).toFixed(1)}%):
+${doc.content.substring(0, 500)}...
+              `.trim();
+            })
+            .join('\n\n');
+
+          // Add entity information if available
+          const entityInfo = orchestratedResult.entities.length > 0
+            ? `\n\nDetected Entities: ${orchestratedResult.entities.map(e => e.text).join(', ')}`
+            : '';
+
+          enhancedPrompt = `
+Based on the following relevant context from previous conversations and documentation:
+
+${contextText}${entityInfo}
+
+---
+
+User request: ${prompt}
+
+Please generate an agent specification considering the above context.
+          `.trim();
+        }
+      } else if (Array.isArray(context) && context.length > 0) {
+        // Handle simple SearchResult array
         const contextText = context
           .map((result, idx) => {
             const doc = result.document;
