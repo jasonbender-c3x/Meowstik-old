@@ -7,14 +7,23 @@ Agentia Compiler with RAG-Enhanced Agent Generation
 Generate structured AI agent specifications from natural language descriptions using Google's Gemini API.
 
 ### 🧠 RAG (Retrieval-Augmented Generation)
-**NEW!** Enhanced agent generation with semantic search across:
+**ENHANCED!** Advanced retrieval orchestrator with multiple recall streams:
+
+**Core Capabilities:**
+- **Hybrid Search**: Combines vector similarity with BM25 keyword search
+- **Multi-Stream Retrieval**: Local RAG + Vertex AI Search + NotebookLM
+- **Entity Recognition**: Extracts structured information from queries
+- **Security**: Prompt injection detection and mitigation
+- **Smart Context Management**: Intelligent context window strategies
+
+**Recall Sources:**
 - Previous conversation history
 - Generated agent specifications  
 - Documentation and examples
 - User notes
 - **Web search results** (NEW!)
 
-Benefits:
+**Benefits:**
 - **Context-Aware**: Leverages past interactions for better results
 - **Consistent**: Similar prompts use successful previous agents as reference
 - **Persistent**: All conversations and agents are indexed for future use
