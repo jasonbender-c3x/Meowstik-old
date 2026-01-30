@@ -33,8 +33,9 @@ export function MeowstikLayout() {
   // Initialize local repo hook
   const { directoryHandle, connect, saveAgent, error: repoError } = useLocalRepo();
   
-  // Ref for debounce timer
+  // Refs for debounce and reset timers
   const debounceTimerRef = useRef<number | null>(null);
+  const resetTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     // Check for API key in environment or localStorage
@@ -52,9 +53,12 @@ export function MeowstikLayout() {
 
   // Auto-sync generatedAgent to disk with debounce
   useEffect(() => {
-    // Clear any existing timer
+    // Clear any existing timers
     if (debounceTimerRef.current) {
       window.clearTimeout(debounceTimerRef.current);
+    }
+    if (resetTimerRef.current) {
+      window.clearTimeout(resetTimerRef.current);
     }
 
     // Don't sync if no agent or no directory connected
@@ -62,18 +66,26 @@ export function MeowstikLayout() {
       return;
     }
 
-    // Set syncing status
-    setSyncStatus('idle');
-
     // Start debounce timer (1000ms)
     debounceTimerRef.current = window.setTimeout(async () => {
       try {
         setSyncStatus('syncing');
         
-        // Create filename from agent name or use default
-        const fileName = generatedAgent.name 
-          ? `${generatedAgent.name.toLowerCase().replace(/\s+/g, '-')}.json`
-          : 'agent.json';
+        // Sanitize filename - remove invalid characters and replace spaces
+        let fileName = 'agent.json';
+        if (generatedAgent.name) {
+          // Remove invalid filename characters: / \ : * ? " < > |
+          const sanitized = generatedAgent.name
+            .replace(/[/\\:*?"<>|]/g, '')
+            .replace(/\s+/g, '-')
+            .toLowerCase()
+            .trim();
+          
+          // Ensure filename is not empty after sanitization
+          if (sanitized) {
+            fileName = `${sanitized}.json`;
+          }
+        }
         
         // Write JSON string to disk
         const jsonContent = JSON.stringify(generatedAgent, null, 2);
@@ -82,7 +94,7 @@ export function MeowstikLayout() {
         setSyncStatus('saved');
         
         // Reset to idle after 2 seconds
-        window.setTimeout(() => setSyncStatus('idle'), 2000);
+        resetTimerRef.current = window.setTimeout(() => setSyncStatus('idle'), 2000);
       } catch (err) {
         console.error('Failed to sync agent to disk:', err);
         setSyncStatus('idle');
@@ -93,6 +105,9 @@ export function MeowstikLayout() {
     return () => {
       if (debounceTimerRef.current) {
         window.clearTimeout(debounceTimerRef.current);
+      }
+      if (resetTimerRef.current) {
+        window.clearTimeout(resetTimerRef.current);
       }
     };
   }, [generatedAgent, directoryHandle, saveAgent]);
