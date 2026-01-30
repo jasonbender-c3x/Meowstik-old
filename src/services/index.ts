@@ -11,3 +11,10 @@ export type { UserProfile } from './StorageService';
 export { IngestionService, createIngestionService } from './IngestionService';
 
 export { EnhancedGeminiService, createEnhancedGeminiService } from './EnhancedGeminiService';
+
+/**
+ * Evolution Center exports
+ */
+export { LogAnalyzer, IssueGenerator } from './EvolutionService';
+export { OpinionAnalyzer } from './OpinionAnalyzer';
+export { CaptainsLogService } from './CaptainsLogService';

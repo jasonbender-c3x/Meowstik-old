@@ -1,4 +1,5 @@
-import type { ToolExecutionLog, ErrorPattern, GitHubIssue, AnalysisResult } from '../types/evolution';
+import type { ToolExecutionLog, ErrorPattern, GitHubIssue, AnalysisResult, TopIssue } from '../types/evolution';
+import { OpinionAnalyzer } from './OpinionAnalyzer';
 
 /**
  * Parse tool execution logs and identify error patterns
@@ -155,18 +156,26 @@ export class LogAnalyzer {
   /**
    * Perform complete analysis on logs
    */
-  static analyze(rawLogs: string): AnalysisResult {
+  static analyze(rawLogs: string, includeOpinions: boolean = true): AnalysisResult {
     const logs = this.parseLogs(rawLogs);
     const patterns = this.identifyErrorPatterns(logs);
     const errorCount = logs.filter(log => log.status === 'error').length;
 
-    return {
+    const result: AnalysisResult = {
       totalLogs: logs.length,
       errorCount,
       patterns,
       issuesCreated: [],
       timestamp: new Date().toISOString(),
     };
+
+    // Analyze opinions if requested
+    if (includeOpinions) {
+      result.opinions = OpinionAnalyzer.extractOpinions(rawLogs);
+      result.topIssues = OpinionAnalyzer.generateTopIssues(result.opinions);
+    }
+
+    return result;
   }
 }
 
@@ -174,6 +183,10 @@ export class LogAnalyzer {
  * Generate GitHub issues from error patterns
  */
 export class IssueGenerator {
+  // Priority thresholds
+  private static readonly HIGH_PRIORITY_THRESHOLD = 5;
+  private static readonly MEDIUM_PRIORITY_THRESHOLD = 3;
+
   /**
    * Generate a GitHub issue from an error pattern
    */
@@ -188,7 +201,7 @@ export class IssueGenerator {
       title,
       body,
       labels,
-      assignees: ['copilot'], // Assign to GitHub Copilot
+      assignees: [], // Leave empty - will be assigned during issue creation
     };
   }
 
@@ -269,5 +282,31 @@ This issue is part of the self-evolution process. The system has identified this
     return patterns
       .filter(pattern => pattern.occurrences >= minOccurrences)
       .map(pattern => this.generateIssue(pattern));
+  }
+
+  /**
+   * Generate GitHub issues from top issues list
+   */
+  static generateIssuesFromTopIssues(topIssues: TopIssue[]): GitHubIssue[] {
+    return topIssues.map(issue => ({
+      title: issue.title,
+      body: issue.description,
+      labels: [
+        'auto-generated',
+        'captains-log',
+        issue.type === 'improvement' ? 'enhancement' : 'bug',
+        `priority:${this.determinePriorityLevel(issue.priority)}`
+      ],
+      assignees: [], // Leave empty - will be assigned during issue creation
+    }));
+  }
+
+  /**
+   * Determine priority level from numeric priority
+   */
+  private static determinePriorityLevel(priority: number): string {
+    if (priority >= this.HIGH_PRIORITY_THRESHOLD) return 'high';
+    if (priority >= this.MEDIUM_PRIORITY_THRESHOLD) return 'medium';
+    return 'low';
   }
 }
