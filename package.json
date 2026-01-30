@@ -5,7 +5,12 @@
   "type": "module",
   "main": "src/hooks/index.ts",
   "scripts": {
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test:entity": "ts-node examples/test-entity-recognition.ts",
+    "test:injection": "ts-node examples/test-prompt-injection.ts",
+    "test:hybrid": "ts-node examples/test-hybrid-search.ts",
+    "test:orchestrator": "ts-node examples/test-orchestrator.ts",
+    "test:all": "npm run test:entity && npm run test:injection && npm run test:hybrid && npm run test:orchestrator"
   },
   "keywords": [
     "react",
