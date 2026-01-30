@@ -1,6 +1,7 @@
 import type { RAGService, DocumentMetadata } from './RAGService';
 import type { ConversationMessage } from '../GeminiService';
 import type { AgentSchema } from '../types/agent';
+import type { SearchResult } from './WebSearchService';
 
 /**
  * Ingestion Service for processing and indexing various content types
@@ -171,6 +172,37 @@ Personality: ${agent.personality?.tone || 'N/A'}
       title,
       tags,
     });
+  }
+
+  /**
+   * Ingest web search results into RAG system
+   * @param searchResults - Array of search results
+   * @param userId - User ID
+   * @param searchQuery - Original search query
+   */
+  async ingestWebSearchResults(
+    searchResults: SearchResult[],
+    userId: string,
+    searchQuery: string
+  ): Promise<void> {
+    for (const result of searchResults) {
+      const content = `
+Title: ${result.title}
+Source: ${result.displayLink}
+URL: ${result.link}
+Content: ${result.snippet}
+      `.trim();
+
+      await this.ragService.addDocument(content, {
+        type: 'web_search_result',
+        userId,
+        source: result.displayLink,
+        title: result.title,
+        url: result.link,
+        searchQuery,
+        timestamp: result.timestamp.toISOString(),
+      });
+    }
   }
 }
 

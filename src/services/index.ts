@@ -12,6 +12,14 @@ export { IngestionService, createIngestionService } from './IngestionService';
 
 export { EnhancedGeminiService, createEnhancedGeminiService } from './EnhancedGeminiService';
 
+export { WebSearchService, createWebSearchService } from './WebSearchService';
+export type { 
+  WebSearchOptions, 
+  SearchResult as WebSearchResult, 
+  SearchResponse, 
+  WebSearchConfig 
+} from './WebSearchService';
+
 /**
  * Evolution Center exports
  */
