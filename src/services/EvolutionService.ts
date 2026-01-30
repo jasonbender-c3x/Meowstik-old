@@ -1,6 +1,5 @@
-import type { ToolExecutionLog, ErrorPattern, GitHubIssue, AnalysisResult, Opinion, TopIssue } from '../types/evolution';
+import type { ToolExecutionLog, ErrorPattern, GitHubIssue, AnalysisResult, TopIssue } from '../types/evolution';
 import { OpinionAnalyzer } from './OpinionAnalyzer';
-import { CaptainsLogService } from './CaptainsLogService';
 
 /**
  * Parse tool execution logs and identify error patterns

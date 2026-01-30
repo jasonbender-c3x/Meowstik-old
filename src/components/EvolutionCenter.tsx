@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { FlaskConical, AlertCircle, CheckCircle, XCircle, Loader2, Upload, FileText, BookOpen, Lightbulb, Bug } from 'lucide-react';
 import { LogAnalyzer, IssueGenerator } from '../services/EvolutionService';
 import { CaptainsLogService } from '../services/CaptainsLogService';
-import type { AnalysisResult, ErrorPattern, Opinion, TopIssue, CaptainsLogEntry } from '../types/evolution';
+import type { AnalysisResult, ErrorPattern, TopIssue, CaptainsLogEntry } from '../types/evolution';
 
 export function EvolutionCenter() {
   const [logInput, setLogInput] = useState('');

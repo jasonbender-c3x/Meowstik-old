@@ -75,7 +75,7 @@ export class OpinionAnalyzer {
     );
 
     // Generate issues from ideas (improvements)
-    for (const [key, group] of ideaGroups.entries()) {
+    for (const group of ideaGroups.values()) {
       issues.push({
         title: `Feature Request: ${this.summarizeOpinionGroup(group)}`,
         description: this.generateIssueDescription(group, 'improvement'),
@@ -86,7 +86,7 @@ export class OpinionAnalyzer {
     }
 
     // Generate issues from pet peeves (fixes)
-    for (const [key, group] of peeveGroups.entries()) {
+    for (const group of peeveGroups.values()) {
       issues.push({
         title: `Fix: ${this.summarizeOpinionGroup(group)}`,
         description: this.generateIssueDescription(group, 'fix'),
