@@ -11,7 +11,7 @@ import {
   StorageService,
   IngestionService,
   WebSearchService,
-} from './services';
+} from '../services';
 
 // Example 1: Basic Setup with Web Search
 async function example1_BasicSetup() {

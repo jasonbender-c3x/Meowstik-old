@@ -31,7 +31,8 @@ Benefits:
 
 [Read the Web Search Integration Guide](./docs/WEB_SEARCH_IMPLEMENTATION_GUIDE.md)
 [Read the Custom Search Proposal](./docs/GOOGLE_CUSTOM_SEARCH_PROPOSAL.md)
-**NEW!** Analyze logs to extract user opinions and automatically generate improvement suggestions:
+
+### 🔬 Self-Evolution Engine with Captain's Log
 - **Opinion Tracking**: Identifies "awesomest ideas" and "biggest pet peeves" from logs
 - **Captain's Log**: Maintains historical record of user feedback in markdown format
 - **Top 10 Issues**: Automatically prioritizes and generates actionable GitHub issues

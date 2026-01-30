@@ -147,30 +147,46 @@ export class EnhancedGeminiService extends GeminiService {
     if (this.isWebSearchAvailable() && this.webSearchService) {
       try {
         console.log(`Performing web search for: ${prompt}`);
-        const searchContext = await this.webSearchService.searchForContext(prompt, {
+        
+        // Perform search once
+        const searchResponse = await this.webSearchService.performSearch(prompt, {
           numResults: 5,
         });
         
-        if (searchContext && searchContext !== 'No web search results found.') {
-          contextParts.push(`=== CURRENT WEB INFORMATION ===\n${searchContext}`);
+        if (searchResponse.results.length > 0) {
+          // Format search results as context
+          const searchContext = searchResponse.results
+            .map((result, idx) => {
+              return `
+[${idx + 1}] ${result.title}
+Source: ${result.displayLink}
+URL: ${result.link}
+Summary: ${result.snippet}
+              `.trim();
+            })
+            .join('\n\n');
+          
+          const formattedContext = `
+Web Search Results (${searchResponse.results.length} results found):
+
+${searchContext}
+
+Search performed at: ${new Date().toISOString()}
+          `.trim();
+          
+          contextParts.push(`=== CURRENT WEB INFORMATION ===\n${formattedContext}`);
           
           // Ingest search results into RAG if available
-          if (this.ingestionService && this.webSearchService) {
-            const searchResponse = await this.webSearchService.performSearch(prompt, {
-              numResults: 5,
-            });
-            
-            if (searchResponse.results.length > 0) {
-              await this.ingestionService.ingestWebSearchResults(
-                searchResponse.results,
-                this.userId,
-                prompt
-              );
-            }
+          if (this.ingestionService) {
+            await this.ingestionService.ingestWebSearchResults(
+              searchResponse.results,
+              this.userId,
+              prompt
+            );
           }
         }
       } catch (error) {
-        console.error('Web search failed:', error);
+        console.error('Web search failed, continuing without search results:', error instanceof Error ? error.message : error);
         // Continue without web search results
       }
     }

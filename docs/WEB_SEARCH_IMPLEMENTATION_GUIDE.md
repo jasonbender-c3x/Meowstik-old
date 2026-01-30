@@ -80,7 +80,7 @@ import {
   StorageService,
   IngestionService,
   WebSearchService
-} from './services';
+} from '../services';
 
 // Initialize services
 const ragService = new RAGService(GEMINI_API_KEY);
