@@ -1,6 +1,14 @@
 import type { Opinion, TopIssue } from '../types/evolution';
 
 /**
+ * Constants for opinion analysis
+ */
+const PEEVE_PRIORITY_MULTIPLIER = 1.5;
+const MIN_WORD_LENGTH_FOR_GROUPING = 3;
+const MAX_SUMMARY_LENGTH = 60;
+const MIN_COMMON_WORDS_FOR_GROUPING = 2;
+
+/**
  * Analyzes logs to extract user opinions about Meowstik
  */
 export class OpinionAnalyzer {
@@ -30,17 +38,17 @@ export class OpinionAnalyzer {
       
       // Check for ideas
       const hasIdeaKeyword = this.IDEA_KEYWORDS.some(keyword => 
-        lowercaseLine.includes(keyword.toLowerCase())
+        lowercaseLine.includes(keyword)
       );
       
       // Check for pet peeves
       const hasPeeveKeyword = this.PEEVE_KEYWORDS.some(keyword => 
-        lowercaseLine.includes(keyword.toLowerCase())
+        lowercaseLine.includes(keyword)
       );
 
       if (hasIdeaKeyword && !hasPeeveKeyword) {
         opinions.push({
-          id: `opinion-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          id: crypto.randomUUID(),
           type: 'idea',
           text: line.trim(),
           timestamp: new Date().toISOString(),
@@ -48,7 +56,7 @@ export class OpinionAnalyzer {
         });
       } else if (hasPeeveKeyword && !hasIdeaKeyword) {
         opinions.push({
-          id: `opinion-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          id: crypto.randomUUID(),
           type: 'peeve',
           text: line.trim(),
           timestamp: new Date().toISOString(),
@@ -90,7 +98,7 @@ export class OpinionAnalyzer {
       issues.push({
         title: `Fix: ${this.summarizeOpinionGroup(group)}`,
         description: this.generateIssueDescription(group, 'fix'),
-        priority: group.length * 1.5, // Pet peeves get higher priority
+        priority: group.length * PEEVE_PRIORITY_MULTIPLIER, // Pet peeves get higher priority
         type: 'fix',
         relatedOpinions: group.map(o => o.id),
       });
@@ -111,7 +119,7 @@ export class OpinionAnalyzer {
       const words = opinion.text.toLowerCase()
         .replace(/[^\w\s]/g, '')
         .split(/\s+/)
-        .filter(w => w.length > 3);
+        .filter(w => w.length > MIN_WORD_LENGTH_FOR_GROUPING);
 
       // Find if this opinion is similar to an existing group
       let foundGroup = false;
@@ -119,7 +127,7 @@ export class OpinionAnalyzer {
         const groupWords = groupKey.split('|');
         const commonWords = words.filter(w => groupWords.includes(w));
         
-        if (commonWords.length >= 2) {
+        if (commonWords.length >= MIN_COMMON_WORDS_FOR_GROUPING) {
           group.push(opinion);
           foundGroup = true;
           break;
@@ -128,7 +136,7 @@ export class OpinionAnalyzer {
 
       // Create new group if no similar one found
       if (!foundGroup) {
-        const key = words.slice(0, 3).join('|');
+        const key = words.slice(0, MIN_WORD_LENGTH_FOR_GROUPING).join('|');
         groups.set(key, [opinion]);
       }
     }
@@ -144,8 +152,8 @@ export class OpinionAnalyzer {
     const representative = opinions[0].text;
     
     // Extract meaningful portion (first 60 chars or until punctuation)
-    const summary = representative.length > 60
-      ? representative.substring(0, 60) + '...'
+    const summary = representative.length > MAX_SUMMARY_LENGTH
+      ? representative.substring(0, MAX_SUMMARY_LENGTH) + '...'
       : representative;
 
     return summary;

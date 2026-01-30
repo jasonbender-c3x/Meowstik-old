@@ -1,6 +1,11 @@
 import type { Opinion, CaptainsLogEntry } from '../types/evolution';
 
 /**
+ * Constants for Captain's Log generation
+ */
+const MIN_TREND_WORD_LENGTH = 4;
+
+/**
  * Manages the Captain's Log - a markdown file storing user opinions
  */
 export class CaptainsLogService {
@@ -111,7 +116,7 @@ export class CaptainsLogService {
       const words = opinion.text.toLowerCase()
         .replace(/[^\w\s]/g, '')
         .split(/\s+/)
-        .filter(w => w.length > 4); // Only words longer than 4 chars
+        .filter(w => w.length > MIN_TREND_WORD_LENGTH); // Only words longer than min length
 
       for (const word of words) {
         wordFrequency.set(word, (wordFrequency.get(word) || 0) + 1);
@@ -155,7 +160,7 @@ export class CaptainsLogService {
         if (ideaLines) {
           for (const line of ideaLines) {
             opinions.push({
-              id: `opinion-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              id: crypto.randomUUID(),
               type: 'idea',
               text: line.replace(/^- /, ''),
               timestamp: new Date(timestampMatch[1]).toISOString(),
@@ -172,7 +177,7 @@ export class CaptainsLogService {
         if (peeveLines) {
           for (const line of peeveLines) {
             opinions.push({
-              id: `opinion-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              id: crypto.randomUUID(),
               type: 'peeve',
               text: line.replace(/^- /, ''),
               timestamp: new Date(timestampMatch[1]).toISOString(),

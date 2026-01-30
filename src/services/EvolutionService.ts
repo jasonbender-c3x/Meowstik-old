@@ -183,6 +183,10 @@ export class LogAnalyzer {
  * Generate GitHub issues from error patterns
  */
 export class IssueGenerator {
+  // Priority thresholds
+  private static readonly HIGH_PRIORITY_THRESHOLD = 5;
+  private static readonly MEDIUM_PRIORITY_THRESHOLD = 3;
+
   /**
    * Generate a GitHub issue from an error pattern
    */
@@ -197,7 +201,7 @@ export class IssueGenerator {
       title,
       body,
       labels,
-      assignees: ['copilot'], // Assign to GitHub Copilot
+      assignees: [], // Leave empty - will be assigned during issue creation
     };
   }
 
@@ -293,7 +297,7 @@ This issue is part of the self-evolution process. The system has identified this
         issue.type === 'improvement' ? 'enhancement' : 'bug',
         `priority:${this.determinePriorityLevel(issue.priority)}`
       ],
-      assignees: ['copilot'],
+      assignees: [], // Leave empty - will be assigned during issue creation
     }));
   }
 
@@ -301,8 +305,8 @@ This issue is part of the self-evolution process. The system has identified this
    * Determine priority level from numeric priority
    */
   private static determinePriorityLevel(priority: number): string {
-    if (priority >= 5) return 'high';
-    if (priority >= 3) return 'medium';
+    if (priority >= this.HIGH_PRIORITY_THRESHOLD) return 'high';
+    if (priority >= this.MEDIUM_PRIORITY_THRESHOLD) return 'medium';
     return 'low';
   }
 }
