@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Cpu, Settings, Trash2, Database, Search } from 'lucide-react';
+import { Cpu, Settings, Trash2, Database, Bug, FlaskConical } from 'lucide-react';
 import { IntentPanel } from './IntentPanel';
 import { ArtifactPreview } from './ArtifactPreview';
+import { DebugPanel } from './DebugPanel';
+import { EvolutionCenter } from './EvolutionCenter';
 import { getGeminiService, ConversationMessage, AgentSpecification } from '../GeminiService';
 import { useRAG } from '../hooks/useRAG';
 import './MeowstikLayout.css';
@@ -18,6 +20,8 @@ export function MeowstikLayout() {
   const [showSettings, setShowSettings] = useState(false);
   const [apiKey, setApiKey] = useState('');
   const [showRAGPanel, setShowRAGPanel] = useState(false);
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
+  const [activeView, setActiveView] = useState<ActiveView>('workspace');
 
   // Initialize Gemini service
   const [geminiService, setGeminiService] = useState<ReturnType<typeof getGeminiService> | null>(null);
@@ -178,6 +182,24 @@ export function MeowstikLayout() {
               RAG Stats
             </button>
           )}
+          <button
+            onClick={() => setShowDebugPanel(!showDebugPanel)}
+            style={{
+              padding: '0.5rem 1rem',
+              backgroundColor: showDebugPanel ? '#f59e0b' : 'transparent',
+              color: showDebugPanel ? 'white' : '#f59e0b',
+              border: '1px solid #f59e0b',
+              borderRadius: '0.375rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+            }}
+            title="Debug Information"
+          >
+            <Bug size={16} />
+            Debug
+          </button>
           <button
             onClick={handleClearHistory}
             style={{
@@ -346,6 +368,25 @@ export function MeowstikLayout() {
         </div>
       )}
 
+      {/* Debug Panel */}
+      {showDebugPanel && (
+        <DebugPanel
+          systemInstruction={
+            (rag.geminiService || geminiService)?.getSystemInstruction?.() || 'System instruction not available'
+          }
+          conversationHistory={conversationHistory}
+          ragDocuments={
+            rag.geminiService?.getAllRAGDocuments?.() || []
+          }
+          retrievedContext={
+            rag.geminiService?.getLastRetrievedContext?.().map(result => ({
+              content: result.document.content,
+              similarity: result.similarity
+            })) || []
+          }
+        />
+      )}
+
       {/* Error Display */}
       {error && (
         <div style={{
@@ -378,7 +419,10 @@ export function MeowstikLayout() {
             className="left-pane"
             style={{ width: `${dividerPosition}%` }}
           >
-            <IntentPanel />
+            <IntentPanel 
+              onSendMessage={handleSendMessage}
+              conversationHistory={conversationHistory}
+            />
           </div>
           
           <div 
@@ -390,7 +434,7 @@ export function MeowstikLayout() {
             className="right-pane"
             style={{ width: `${100 - dividerPosition}%` }}
           >
-            <ArtifactPreview />
+            <ArtifactPreview agent={generatedAgent} />
           </div>
         </div>
       ) : (

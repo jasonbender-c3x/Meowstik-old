@@ -13,6 +13,7 @@ export class EnhancedGeminiService extends GeminiService {
   private ingestionService: IngestionService | null = null;
   private ragEnabled: boolean = true;
   private userId: string = 'default_user';
+  private lastRetrievedContext: SearchResult[] = [];
 
   /**
    * Enable RAG functionality
@@ -119,6 +120,7 @@ export class EnhancedGeminiService extends GeminiService {
     // Retrieve and inject context if RAG is enabled
     if (useRAG && this.isRAGAvailable()) {
       const context = await this.retrieveContext(prompt, 5);
+      this.lastRetrievedContext = context; // Store for debug purposes
 
       if (context.length > 0) {
         const contextText = context
@@ -143,6 +145,8 @@ User request: ${prompt}
 Please generate an agent specification considering the above context.
         `.trim();
       }
+    } else {
+      this.lastRetrievedContext = []; // Clear if not using RAG
     }
 
     // Generate agent using base service
@@ -255,6 +259,25 @@ Please generate an agent specification considering the above context.
       type: 'conversation',
       userId: this.userId,
     });
+  }
+
+  /**
+   * Get the last retrieved context from RAG
+   * @returns Last retrieved context (for debug purposes)
+   */
+  getLastRetrievedContext(): SearchResult[] {
+    return this.lastRetrievedContext;
+  }
+
+  /**
+   * Get all documents from RAG (for debug purposes)
+   * @returns All documents in RAG system
+   */
+  getAllRAGDocuments() {
+    if (!this.ragService) {
+      return [];
+    }
+    return this.ragService.getDocuments();
   }
 }
 
