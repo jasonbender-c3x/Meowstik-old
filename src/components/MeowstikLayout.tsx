@@ -1,12 +1,15 @@
-import { useState, useEffect } from 'react';
-import { Cpu, Settings, Trash2, Database, Search } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Cpu, Settings, Trash2, Database, FolderOpen, Loader2, Check, FlaskConical } from 'lucide-react';
 import { IntentPanel } from './IntentPanel';
 import { ArtifactPreview } from './ArtifactPreview';
+import { EvolutionCenter } from './EvolutionCenter';
 import { getGeminiService, ConversationMessage, AgentSpecification } from '../GeminiService';
 import { useRAG } from '../hooks/useRAG';
+import { useLocalRepo } from '../hooks/useLocalRepo';
 import './MeowstikLayout.css';
 
 type ActiveView = 'workspace' | 'evolution';
+type SyncStatus = 'idle' | 'syncing' | 'saved';
 
 export function MeowstikLayout() {
   const [dividerPosition, setDividerPosition] = useState(50);
@@ -18,12 +21,20 @@ export function MeowstikLayout() {
   const [showSettings, setShowSettings] = useState(false);
   const [apiKey, setApiKey] = useState('');
   const [showRAGPanel, setShowRAGPanel] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
+  const [activeView, setActiveView] = useState<ActiveView>('workspace');
 
   // Initialize Gemini service
   const [geminiService, setGeminiService] = useState<ReturnType<typeof getGeminiService> | null>(null);
   
   // Initialize RAG
   const rag = useRAG(apiKey || null);
+  
+  // Initialize local repo hook
+  const { directoryHandle, connect, saveAgent, error: repoError } = useLocalRepo();
+  
+  // Ref for debounce timer
+  const debounceTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     // Check for API key in environment or localStorage
@@ -38,6 +49,53 @@ export function MeowstikLayout() {
       }
     }
   }, []);
+
+  // Auto-sync generatedAgent to disk with debounce
+  useEffect(() => {
+    // Clear any existing timer
+    if (debounceTimerRef.current) {
+      window.clearTimeout(debounceTimerRef.current);
+    }
+
+    // Don't sync if no agent or no directory connected
+    if (!generatedAgent || !directoryHandle) {
+      return;
+    }
+
+    // Set syncing status
+    setSyncStatus('idle');
+
+    // Start debounce timer (1000ms)
+    debounceTimerRef.current = window.setTimeout(async () => {
+      try {
+        setSyncStatus('syncing');
+        
+        // Create filename from agent name or use default
+        const fileName = generatedAgent.name 
+          ? `${generatedAgent.name.toLowerCase().replace(/\s+/g, '-')}.json`
+          : 'agent.json';
+        
+        // Write JSON string to disk
+        const jsonContent = JSON.stringify(generatedAgent, null, 2);
+        await saveAgent(fileName, jsonContent);
+        
+        setSyncStatus('saved');
+        
+        // Reset to idle after 2 seconds
+        window.setTimeout(() => setSyncStatus('idle'), 2000);
+      } catch (err) {
+        console.error('Failed to sync agent to disk:', err);
+        setSyncStatus('idle');
+      }
+    }, 1000);
+
+    // Cleanup function
+    return () => {
+      if (debounceTimerRef.current) {
+        window.clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [generatedAgent, directoryHandle, saveAgent]);
 
   const handleMouseDown = () => {
     setIsDragging(true);
@@ -158,6 +216,56 @@ export function MeowstikLayout() {
           )}
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          {/* Sync Status Indicator */}
+          {directoryHandle && syncStatus !== 'idle' && (
+            <div
+              style={{
+                padding: '0.5rem 1rem',
+                backgroundColor: syncStatus === 'syncing' ? '#fef3c7' : '#d1fae5',
+                color: syncStatus === 'syncing' ? '#92400e' : '#065f46',
+                border: `1px solid ${syncStatus === 'syncing' ? '#fbbf24' : '#10b981'}`,
+                borderRadius: '0.375rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+              }}
+            >
+              {syncStatus === 'syncing' ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  Syncing...
+                </>
+              ) : (
+                <>
+                  <Check size={16} />
+                  Saved
+                </>
+              )}
+            </div>
+          )}
+          
+          {/* Connect to Local Repo Button */}
+          <button
+            onClick={connect}
+            style={{
+              padding: '0.5rem 1rem',
+              backgroundColor: directoryHandle ? '#10b981' : 'transparent',
+              color: directoryHandle ? 'white' : '#10b981',
+              border: '1px solid #10b981',
+              borderRadius: '0.375rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+            }}
+            title={directoryHandle ? 'Connected to local directory' : 'Connect to local directory for auto-save'}
+          >
+            <FolderOpen size={16} />
+            {directoryHandle ? 'Connected' : 'Connect Folder'}
+          </button>
+          
           {rag.isInitialized && (
             <button
               onClick={() => setShowRAGPanel(!showRAGPanel)}
@@ -347,7 +455,7 @@ export function MeowstikLayout() {
       )}
 
       {/* Error Display */}
-      {error && (
+      {(error || repoError) && (
         <div style={{
           backgroundColor: '#fee2e2',
           borderBottom: '1px solid #ef4444',
@@ -355,7 +463,8 @@ export function MeowstikLayout() {
           color: '#991b1b',
           fontSize: '0.875rem',
         }}>
-          Error: {error}
+          {error && <div>Error: {error}</div>}
+          {repoError && <div>Repo Error: {repoError.message}</div>}
         </div>
       )}
 
@@ -378,7 +487,10 @@ export function MeowstikLayout() {
             className="left-pane"
             style={{ width: `${dividerPosition}%` }}
           >
-            <IntentPanel />
+            <IntentPanel 
+              onSendMessage={handleSendMessage}
+              conversationHistory={conversationHistory}
+            />
           </div>
           
           <div 
@@ -390,7 +502,7 @@ export function MeowstikLayout() {
             className="right-pane"
             style={{ width: `${100 - dividerPosition}%` }}
           >
-            <ArtifactPreview />
+            <ArtifactPreview agent={generatedAgent} />
           </div>
         </div>
       ) : (
