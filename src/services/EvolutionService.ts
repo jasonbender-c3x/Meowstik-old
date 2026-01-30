@@ -1,4 +1,6 @@
-import type { ToolExecutionLog, ErrorPattern, GitHubIssue, AnalysisResult } from '../types/evolution';
+import type { ToolExecutionLog, ErrorPattern, GitHubIssue, AnalysisResult, Opinion, TopIssue } from '../types/evolution';
+import { OpinionAnalyzer } from './OpinionAnalyzer';
+import { CaptainsLogService } from './CaptainsLogService';
 
 /**
  * Parse tool execution logs and identify error patterns
@@ -155,18 +157,26 @@ export class LogAnalyzer {
   /**
    * Perform complete analysis on logs
    */
-  static analyze(rawLogs: string): AnalysisResult {
+  static analyze(rawLogs: string, includeOpinions: boolean = true): AnalysisResult {
     const logs = this.parseLogs(rawLogs);
     const patterns = this.identifyErrorPatterns(logs);
     const errorCount = logs.filter(log => log.status === 'error').length;
 
-    return {
+    const result: AnalysisResult = {
       totalLogs: logs.length,
       errorCount,
       patterns,
       issuesCreated: [],
       timestamp: new Date().toISOString(),
     };
+
+    // Analyze opinions if requested
+    if (includeOpinions) {
+      result.opinions = OpinionAnalyzer.extractOpinions(rawLogs);
+      result.topIssues = OpinionAnalyzer.generateTopIssues(result.opinions);
+    }
+
+    return result;
   }
 }
 
@@ -269,5 +279,31 @@ This issue is part of the self-evolution process. The system has identified this
     return patterns
       .filter(pattern => pattern.occurrences >= minOccurrences)
       .map(pattern => this.generateIssue(pattern));
+  }
+
+  /**
+   * Generate GitHub issues from top issues list
+   */
+  static generateIssuesFromTopIssues(topIssues: TopIssue[]): GitHubIssue[] {
+    return topIssues.map(issue => ({
+      title: issue.title,
+      body: issue.description,
+      labels: [
+        'auto-generated',
+        'captains-log',
+        issue.type === 'improvement' ? 'enhancement' : 'bug',
+        `priority:${this.determinePriorityLevel(issue.priority)}`
+      ],
+      assignees: ['copilot'],
+    }));
+  }
+
+  /**
+   * Determine priority level from numeric priority
+   */
+  private static determinePriorityLevel(priority: number): string {
+    if (priority >= 5) return 'high';
+    if (priority >= 3) return 'medium';
+    return 'low';
   }
 }

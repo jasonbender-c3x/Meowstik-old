@@ -30,10 +30,35 @@ export interface GitHubIssue {
   assignees: string[];
 }
 
+export interface Opinion {
+  id: string;
+  type: 'idea' | 'peeve';
+  text: string;
+  timestamp: string;
+  context?: string;
+  source: string;
+}
+
+export interface CaptainsLogEntry {
+  timestamp: string;
+  opinions: Opinion[];
+  summary: string;
+}
+
+export interface TopIssue {
+  title: string;
+  description: string;
+  priority: number;
+  type: 'improvement' | 'fix';
+  relatedOpinions: string[];
+}
+
 export interface AnalysisResult {
   totalLogs: number;
   errorCount: number;
   patterns: ErrorPattern[];
   issuesCreated: GitHubIssue[];
   timestamp: string;
+  opinions?: Opinion[];
+  topIssues?: TopIssue[];
 }
