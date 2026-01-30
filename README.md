@@ -19,6 +19,15 @@ Benefits:
 - **Persistent**: All conversations and agents are indexed for future use
 - **Discoverable**: Search through all past generations
 
+### 🔬 Self-Evolution Engine with Captain's Log
+**NEW!** Analyze logs to extract user opinions and automatically generate improvement suggestions:
+- **Opinion Tracking**: Identifies "awesomest ideas" and "biggest pet peeves" from logs
+- **Captain's Log**: Maintains historical record of user feedback in markdown format
+- **Top 10 Issues**: Automatically prioritizes and generates actionable GitHub issues
+- **Smart Analysis**: Groups similar opinions and ranks by impact and frequency
+
+[Read the full Captain's Log documentation](./docs/CAPTAINS_LOG.md)
+
 ### 🔐 Secure File System Bridge
 Persist agents to disk using the browser's native File System Access API with the `useLocalRepo` React hook.
 
