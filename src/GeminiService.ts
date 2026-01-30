@@ -182,6 +182,14 @@ You have access to conversation history and should consider previous context whe
     return this.conversationHistory.length;
   }
 
+  /**
+   * Get the system instruction being used by the model
+   * @returns The system instruction string
+   */
+  getSystemInstruction(): string {
+    return this.systemInstruction;
+  }
+
 }
 
 /**

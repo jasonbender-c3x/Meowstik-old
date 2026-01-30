@@ -1,5 +1,5 @@
 import { GeminiService, AgentSpecification } from '../GeminiService';
-import type { RAGService, SearchResult } from './RAGService';
+import type { RAGService, SearchResult, Document } from './RAGService';
 import type { StorageService } from './StorageService';
 import type { IngestionService } from './IngestionService';
 import type { RetrievalOrchestrator, OrchestratedResult } from './RetrievalOrchestrator';
@@ -15,6 +15,7 @@ export class EnhancedGeminiService extends GeminiService {
   private retrievalOrchestrator: RetrievalOrchestrator | null = null;
   private ragEnabled: boolean = true;
   private userId: string = 'default_user';
+  private lastRetrievedContext: SearchResult[] = [];
 
   /**
    * Enable RAG functionality
@@ -151,6 +152,7 @@ export class EnhancedGeminiService extends GeminiService {
     // Retrieve and inject context if RAG is enabled
     if (useRAG && this.isRAGAvailable()) {
       const context = await this.retrieveContext(prompt, 5);
+      this.lastRetrievedContext = context; // Store for debug purposes
 
       // Handle orchestrated results
       if (context && typeof context === 'object' && 'documents' in context) {
@@ -208,6 +210,8 @@ User request: ${prompt}
 Please generate an agent specification considering the above context.
         `.trim();
       }
+    } else {
+      this.lastRetrievedContext = []; // Clear if not using RAG
     }
 
     // Generate agent using base service
@@ -320,6 +324,25 @@ Please generate an agent specification considering the above context.
       type: 'conversation',
       userId: this.userId,
     });
+  }
+
+  /**
+   * Get the last retrieved context from RAG
+   * @returns Last retrieved context (for debug purposes)
+   */
+  getLastRetrievedContext(): SearchResult[] {
+    return this.lastRetrievedContext;
+  }
+
+  /**
+   * Get all documents from RAG (for debug purposes)
+   * @returns All documents in RAG system
+   */
+  getAllRAGDocuments(): Document[] {
+    if (!this.ragService) {
+      return [];
+    }
+    return this.ragService.getDocuments();
   }
 }
 
