@@ -1,5 +1,5 @@
 import { GeminiService, AgentSpecification } from '../GeminiService';
-import type { RAGService, SearchResult } from './RAGService';
+import type { RAGService, SearchResult, Document } from './RAGService';
 import type { StorageService } from './StorageService';
 import type { IngestionService } from './IngestionService';
 
@@ -273,7 +273,7 @@ Please generate an agent specification considering the above context.
    * Get all documents from RAG (for debug purposes)
    * @returns All documents in RAG system
    */
-  getAllRAGDocuments() {
+  getAllRAGDocuments(): Document[] {
     if (!this.ragService) {
       return [];
     }
