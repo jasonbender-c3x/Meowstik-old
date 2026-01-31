@@ -34,7 +34,7 @@ This project is in early development. Documentation will be continuously updated
 
 | Document | Status | Description |
 |----------|--------|-------------|
-| [public/NOTEBOOKLM_PUPPETEER_PROPOSAL.md](public/NOTEBOOKLM_PUPPETEER_PROPOSAL.md) | ✅ Available | Comprehensive proposal for puppeteering NotebookLM web pages for programmatic access |
+| [docs/NOTEBOOKLM_PUPPETEER_PROPOSAL.md](docs/NOTEBOOKLM_PUPPETEER_PROPOSAL.md) | ✅ Available | Comprehensive proposal for puppeteering NotebookLM web pages for programmatic access |
 
 ### User Guides
 
