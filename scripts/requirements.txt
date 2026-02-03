@@ -1,0 +1,10 @@
+# Python Requirements for Meowstik Middleware
+
+# Firestore client for RAG ingestion
+google-cloud-firestore>=2.11.0
+
+# Optional: For enhanced vector operations
+# numpy>=1.24.0
+
+# Optional: For environment management
+python-dotenv>=1.0.0
