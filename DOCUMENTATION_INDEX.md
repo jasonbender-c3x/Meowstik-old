@@ -6,7 +6,7 @@ Welcome to the Meowstik documentation! This index provides a comprehensive overv
 
 This project is in early development. Documentation will be continuously updated as features are implemented.
 
-**Last Updated**: January 29, 2026
+**Last Updated**: January 31, 2026
 
 ---
 
@@ -29,6 +29,12 @@ This project is in early development. Documentation will be continuously updated
 | [docs/api/README.md](docs/api/README.md) | ✅ Available | API reference and usage (content coming soon) |
 | [docs/development/README.md](docs/development/README.md) | ✅ Available | Development environment setup and guidelines (content coming soon) |
 | [docs/examples/README.md](docs/examples/README.md) | ✅ Available | Code examples and tutorials (content coming soon) |
+
+### Proposals and Design Documents
+
+| Document | Status | Description |
+|----------|--------|-------------|
+| [docs/NOTEBOOKLM_PUPPETEER_PROPOSAL.md](docs/NOTEBOOKLM_PUPPETEER_PROPOSAL.md) | ✅ Available | Comprehensive proposal for puppeteering NotebookLM web pages for programmatic access |
 
 ### User Guides
 
