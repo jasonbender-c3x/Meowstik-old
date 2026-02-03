@@ -186,19 +186,44 @@ export const allTools = [
  * Tool execution handlers
  * These functions implement the actual logic for each tool
  */
+
+import type { RAGService, SearchResult } from './RAGService';
+import type { StorageService } from './StorageService';
+import type { IngestionService } from './IngestionService';
+
 export interface ToolExecutionContext {
-  ragService?: any;
-  storageService?: any;
-  ingestionService?: any;
+  ragService?: RAGService;
+  storageService?: StorageService;
+  ingestionService?: IngestionService;
+}
+
+export interface SearchFilters {
+  type?: 'conversation' | 'agent' | 'documentation' | 'user_note';
+  tags?: string[];
+}
+
+export interface AppendMetadata {
+  tags?: string[];
+  source?: string;
+}
+
+export interface CreateMetadata {
+  tags?: string[];
+  description?: string;
+}
+
+export interface ReplaceMetadata {
+  reason?: string;
+  preserveHistory?: boolean;
 }
 
 /**
  * Execute a search operation
  */
 export async function executeSearch(
-  args: { query: string; filters?: any; limit?: number },
+  args: { query: string; filters?: SearchFilters; limit?: number },
   context: ToolExecutionContext
-): Promise<any> {
+): Promise<{ results: SearchResult[]; count: number; query: string }> {
   const { ragService } = context;
   
   if (!ragService) {
@@ -226,22 +251,29 @@ export async function executeSearch(
  * Execute an append operation
  */
 export async function executeAppend(
-  args: { target: string; content: string; metadata?: any },
+  args: { target: string; content: string; metadata?: AppendMetadata },
   context: ToolExecutionContext
-): Promise<any> {
+): Promise<{ success: boolean; target: string; contentLength: number; message: string }> {
   const { storageService } = context;
 
   if (!storageService) {
     throw new Error('Storage service not available for append operation');
   }
 
-  // Implementation would depend on your storage system
-  // This is a placeholder for the actual implementation
+  // TODO: Implementation depends on your storage system
+  // This is a placeholder - actual implementation would:
+  // 1. Load existing content from storage using target identifier
+  // 2. Append new content to it
+  // 3. Save the updated content back to storage
+  // 4. Apply any metadata updates
+  
+  console.warn('executeAppend: Placeholder implementation - no actual append performed');
+  
   return {
     success: true,
     target: args.target,
     contentLength: args.content.length,
-    message: 'Content appended successfully',
+    message: 'Content append operation received (placeholder implementation)',
   };
 }
 
@@ -249,23 +281,30 @@ export async function executeAppend(
  * Execute a create operation
  */
 export async function executeCreate(
-  args: { type: string; name: string; content: string; metadata?: any },
+  args: { type: string; name: string; content: string; metadata?: CreateMetadata },
   context: ToolExecutionContext
-): Promise<any> {
+): Promise<{ success: boolean; type: string; name: string; id: string; message: string }> {
   const { ingestionService, storageService } = context;
 
   if (!ingestionService || !storageService) {
     throw new Error('Required services not available for create operation');
   }
 
-  // Implementation would depend on the type being created
-  // This is a placeholder for the actual implementation
+  // TODO: Implementation depends on the type being created
+  // This is a placeholder - actual implementation would:
+  // 1. Create the content based on type (agent, document, note, etc.)
+  // 2. Store it in the appropriate storage
+  // 3. Ingest it into the RAG system if needed
+  // 4. Apply metadata and tags
+  
+  console.warn('executeCreate: Placeholder implementation - no actual creation performed');
+  
   return {
     success: true,
     type: args.type,
     name: args.name,
     id: `${args.type}-${Date.now()}`,
-    message: 'Content created successfully',
+    message: 'Content creation operation received (placeholder implementation)',
   };
 }
 
@@ -273,23 +312,30 @@ export async function executeCreate(
  * Execute a replace operation
  */
 export async function executeReplace(
-  args: { target: string; newContent: string; partial?: boolean; metadata?: any },
+  args: { target: string; newContent: string; partial?: boolean; metadata?: ReplaceMetadata },
   context: ToolExecutionContext
-): Promise<any> {
+): Promise<{ success: boolean; target: string; partial: boolean; contentLength: number; message: string }> {
   const { storageService } = context;
 
   if (!storageService) {
     throw new Error('Storage service not available for replace operation');
   }
 
-  // Implementation would depend on your storage system
-  // This is a placeholder for the actual implementation
+  // TODO: Implementation depends on your storage system
+  // This is a placeholder - actual implementation would:
+  // 1. Load existing content using target identifier
+  // 2. Replace it with newContent (fully or partially based on args.partial)
+  // 3. Optionally preserve history if args.metadata?.preserveHistory is true
+  // 4. Save the updated content back to storage
+  
+  console.warn('executeReplace: Placeholder implementation - no actual replacement performed');
+  
   return {
     success: true,
     target: args.target,
     partial: args.partial || false,
     contentLength: args.newContent.length,
-    message: 'Content replaced successfully',
+    message: 'Content replace operation received (placeholder implementation)',
   };
 }
 
@@ -298,18 +344,18 @@ export async function executeReplace(
  */
 export async function executeFunctionCall(
   functionName: string,
-  functionArgs: any,
+  functionArgs: Record<string, unknown>,
   context: ToolExecutionContext
-): Promise<any> {
+): Promise<unknown> {
   switch (functionName) {
     case 'search':
-      return await executeSearch(functionArgs, context);
+      return await executeSearch(functionArgs as Parameters<typeof executeSearch>[0], context);
     case 'append':
-      return await executeAppend(functionArgs, context);
+      return await executeAppend(functionArgs as Parameters<typeof executeAppend>[0], context);
     case 'create':
-      return await executeCreate(functionArgs, context);
+      return await executeCreate(functionArgs as Parameters<typeof executeCreate>[0], context);
     case 'replace':
-      return await executeReplace(functionArgs, context);
+      return await executeReplace(functionArgs as Parameters<typeof executeReplace>[0], context);
     default:
       throw new Error(`Unknown function: ${functionName}`);
   }
