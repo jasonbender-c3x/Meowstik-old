@@ -303,7 +303,7 @@ export async function executeCreate(
     success: true,
     type: args.type,
     name: args.name,
-    id: `${args.type}-${Date.now()}`,
+    id: `${args.type}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`, // Temporary ID with random suffix
     message: 'Content creation operation received (placeholder implementation)',
   };
 }
