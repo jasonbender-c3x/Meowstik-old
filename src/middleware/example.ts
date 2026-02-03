@@ -59,9 +59,9 @@ async function createIssueExample() {
 /**
  * Example 2: Load core context for LLM prompts
  */
-function loadContextExample() {
+async function loadContextExample() {
   // Load core files
-  const context = middleware.getCoreContext();
+  const context = await middleware.getCoreContext();
   
   console.log('Loaded core files:');
   for (const [file, content] of context.entries()) {
@@ -100,7 +100,9 @@ if (require.main === module) {
   
   // Example 2: Load context
   console.log('\nExample 2: Loading Core Context\n');
-  loadContextExample();
+  (async () => {
+    await loadContextExample();
+  })();
   
   // Example 3: Check credentials
   console.log('\nExample 3: Checking Credentials\n');
