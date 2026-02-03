@@ -3,6 +3,7 @@ import { GoogleGenerativeAI, ChatSession } from '@google/generative-ai';
 import { Sparkles, Code2, Eye, Settings, Send, Loader2, Trash2 } from 'lucide-react';
 import type { AgentSchema } from '../types/agent';
 import type { ConversationMessage } from '../GeminiService';
+import { allTools } from '../services/GeminiTools';
 
 export default function AgentGenerator() {
   const [prompt, setPrompt] = useState('');
@@ -58,7 +59,9 @@ The JSON should follow this schema:
 }
 
 Return ONLY valid JSON, no markdown formatting or explanation.
-You have access to conversation history and should consider previous context when generating responses.`
+You have access to conversation history and should consider previous context when generating responses.
+You also have access to tools for search, append, create, and replace operations.`,
+          tools: allTools, // Enable function calling for search, append, create, replace
         });
         
         const session = model.startChat({
@@ -81,7 +84,8 @@ You have access to conversation history and should consider previous context whe
       const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel({ 
         model: 'gemini-1.5-flash',
-        systemInstruction: `You are an expert AI assistant that generates agent specifications in JSON format.`
+        systemInstruction: `You are an expert AI assistant that generates agent specifications in JSON format.`,
+        tools: allTools, // Enable function calling for search, append, create, replace
       });
       setChatSession(model.startChat({ history: [] }));
     }

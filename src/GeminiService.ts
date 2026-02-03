@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI, GenerativeModel, ChatSession } from '@google/generative-ai';
 import * as dotenv from 'dotenv';
+import { allTools } from './services/GeminiTools';
 
 // Load environment variables
 dotenv.config();
@@ -60,7 +61,7 @@ The JSON should follow this structure:
 Always respond with valid JSON only. Do not include markdown code blocks or any other formatting.
 You have access to conversation history and should consider previous context when generating responses.`;
     
-    // Initialize the model with JSON response formatting
+    // Initialize the model with JSON response formatting and function calling tools
     // Using gemini-1.5-flash for faster responses, can be configured for gemini-1.5-pro
     this.model = this.genAI.getGenerativeModel({
       model: 'gemini-1.5-flash',
@@ -71,6 +72,7 @@ You have access to conversation history and should consider previous context whe
         maxOutputTokens: 8192,
       },
       systemInstruction: this.systemInstruction,
+      tools: allTools, // Enable function calling for search, append, create, replace
     });
     
     // Initialize chat session with empty history

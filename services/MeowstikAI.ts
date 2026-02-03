@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI, ChatSession } from '@google/generative-ai';
 import { z } from 'zod';
+import { allTools } from '../src/services/GeminiTools';
 
 /**
  * Custom error class for Meowstik generation errors
@@ -76,7 +77,7 @@ The JSON should follow this structure:
 Always respond with valid JSON only. Do not include markdown code blocks or any other formatting.
 You have access to conversation history and should consider previous context when generating responses.`;
     
-    // Get the Gemini 1.5 Flash model
+    // Get the Gemini 1.5 Flash model with function calling tools
     const model = genAI.getGenerativeModel({
       model: 'gemini-1.5-flash',
       generationConfig: {
@@ -87,6 +88,7 @@ You have access to conversation history and should consider previous context whe
         maxOutputTokens: 8192,
       },
       systemInstruction,
+      tools: allTools, // Enable function calling for search, append, create, replace
     });
 
     // Initialize or reuse chat session
