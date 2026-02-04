@@ -21,21 +21,27 @@ Generate structured AI agent specifications from natural language descriptions u
 - Generated agent specifications  
 - Documentation and examples
 - User notes
-- Vertex AI Search (optional - enterprise scale)
-- NotebookLM (optional - enhanced document understanding)
+- **Web search results** (NEW!)
 
 **Benefits:**
 - **Context-Aware**: Leverages past interactions for better results
-- **Secure**: Built-in protection against prompt injection attacks
-- **Intelligent**: Entity recognition for better query understanding
-- **Scalable**: Multiple recall streams for comprehensive coverage
-- **Flexible**: Configurable hybrid search and context strategies
+- **Consistent**: Similar prompts use successful previous agents as reference
+- **Persistent**: All conversations and agents are indexed for future use
+- **Discoverable**: Search through all past generations
+- **Grounded**: Web search provides current, accurate information
 
-[📚 Retrieval Orchestrator Documentation](./docs/RETRIEVAL_ORCHESTRATOR.md)  
-[⚙️ Vertex AI & NotebookLM Setup Guide](./docs/VERTEX_NOTEBOOKLM_SETUP.md)
+### 🔍 Web Search Integration
+**NEW!** Automatic Google Custom Search integration for grounded responses:
+- Performs web searches during each agent generation
+- Integrates current information from the web
+- Enriches RAG system with search results
+- Provides verifiable sources and citations
+- Reduces hallucination with fact-based generation
+
+[Read the Web Search Integration Guide](./docs/WEB_SEARCH_IMPLEMENTATION_GUIDE.md)
+[Read the Custom Search Proposal](./docs/GOOGLE_CUSTOM_SEARCH_PROPOSAL.md)
 
 ### 🔬 Self-Evolution Engine with Captain's Log
-**NEW!** Analyze logs to extract user opinions and automatically generate improvement suggestions:
 - **Opinion Tracking**: Identifies "awesomest ideas" and "biggest pet peeves" from logs
 - **Captain's Log**: Maintains historical record of user feedback in markdown format
 - **Top 10 Issues**: Automatically prioritizes and generates actionable GitHub issues
@@ -78,6 +84,8 @@ function MyComponent() {
 - [Hook Documentation](./src/hooks/README.md) - Complete API reference and examples
 - [RAG Implementation](./docs/RAG_IMPLEMENTATION.md) - RAG system documentation
 - [Memory & RAG Guide](./docs/MEMORY_AND_RAG.md) - Memory architecture overview
+- [Web Search Integration](./docs/WEB_SEARCH_IMPLEMENTATION_GUIDE.md) - Web search setup and usage
+- [Custom Search Proposal](./docs/GOOGLE_CUSTOM_SEARCH_PROPOSAL.md) - Technical specification
 - [Implementation Summary](./IMPLEMENTATION_SUMMARY.md) - Technical details and security features
 - [Example Component](./src/AgentPersistenceExample.tsx) - Full working example
 

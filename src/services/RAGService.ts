@@ -15,11 +15,13 @@ export interface Document {
  * Metadata for documents in the RAG system
  */
 export interface DocumentMetadata {
-  type: 'conversation' | 'agent' | 'documentation' | 'user_note';
+  type: 'conversation' | 'agent' | 'documentation' | 'user_note' | 'web_search_result';
   userId?: string;
   source?: string;
   title?: string;
   tags?: string[];
+  url?: string;
+  searchQuery?: string;
   [key: string]: any;
 }
 

@@ -2,18 +2,19 @@ import { GeminiService, AgentSpecification } from '../GeminiService';
 import type { RAGService, SearchResult, Document } from './RAGService';
 import type { StorageService } from './StorageService';
 import type { IngestionService } from './IngestionService';
-import type { RetrievalOrchestrator, OrchestratedResult } from './RetrievalOrchestrator';
+import type { WebSearchService } from './WebSearchService';
 
 /**
- * Enhanced Gemini Service with RAG capabilities
- * Extends the base GeminiService to include context retrieval and injection
+ * Enhanced Gemini Service with RAG and Web Search capabilities
+ * Extends the base GeminiService to include context retrieval, web search, and injection
  */
 export class EnhancedGeminiService extends GeminiService {
   private ragService: RAGService | null = null;
   private storageService: StorageService | null = null;
   private ingestionService: IngestionService | null = null;
-  private retrievalOrchestrator: RetrievalOrchestrator | null = null;
+  private webSearchService: WebSearchService | null = null;
   private ragEnabled: boolean = true;
+  private webSearchEnabled: boolean = false;
   private userId: string = 'default_user';
   private lastRetrievedContext: SearchResult[] = [];
 
@@ -60,6 +61,29 @@ export class EnhancedGeminiService extends GeminiService {
    */
   isRAGAvailable(): boolean {
     return this.ragEnabled && this.ragService !== null;
+  }
+
+  /**
+   * Enable web search functionality
+   * @param webSearchService - Web search service instance
+   */
+  enableWebSearch(webSearchService: WebSearchService): void {
+    this.webSearchService = webSearchService;
+    this.webSearchEnabled = true;
+  }
+
+  /**
+   * Disable web search functionality
+   */
+  disableWebSearch(): void {
+    this.webSearchEnabled = false;
+  }
+
+  /**
+   * Check if web search is enabled and available
+   */
+  isWebSearchAvailable(): boolean {
+    return this.webSearchEnabled && this.webSearchService !== null && this.webSearchService.isEnabled();
   }
 
   /**
@@ -138,7 +162,7 @@ export class EnhancedGeminiService extends GeminiService {
   }
 
   /**
-   * Generate agent with RAG-enhanced context
+   * Generate agent with RAG-enhanced context and web search
    * @param prompt - User prompt
    * @param useRAG - Whether to use RAG for context
    * @returns Promise<AgentSpecification> - Generated agent
@@ -148,8 +172,57 @@ export class EnhancedGeminiService extends GeminiService {
     useRAG: boolean = true
   ): Promise<AgentSpecification> {
     let enhancedPrompt = prompt;
+    const contextParts: string[] = [];
 
-    // Retrieve and inject context if RAG is enabled
+    // Perform web search if enabled
+    if (this.isWebSearchAvailable() && this.webSearchService) {
+      try {
+        console.log(`Performing web search for: ${prompt}`);
+        
+        // Perform search once
+        const searchResponse = await this.webSearchService.performSearch(prompt, {
+          numResults: 5,
+        });
+        
+        if (searchResponse.results.length > 0) {
+          // Format search results as context
+          const searchContext = searchResponse.results
+            .map((result, idx) => {
+              return `
+[${idx + 1}] ${result.title}
+Source: ${result.displayLink}
+URL: ${result.link}
+Summary: ${result.snippet}
+              `.trim();
+            })
+            .join('\n\n');
+          
+          const formattedContext = `
+Web Search Results (${searchResponse.results.length} results found):
+
+${searchContext}
+
+Search performed at: ${new Date().toISOString()}
+          `.trim();
+          
+          contextParts.push(`=== CURRENT WEB INFORMATION ===\n${formattedContext}`);
+          
+          // Ingest search results into RAG if available
+          if (this.ingestionService) {
+            await this.ingestionService.ingestWebSearchResults(
+              searchResponse.results,
+              this.userId,
+              prompt
+            );
+          }
+        }
+      } catch (error) {
+        console.error('Web search failed, continuing without search results:', error instanceof Error ? error.message : error);
+        // Continue without web search results
+      }
+    }
+
+    // Retrieve and inject RAG context if enabled
     if (useRAG && this.isRAGAvailable()) {
       const context = await this.retrieveContext(prompt, 5);
       this.lastRetrievedContext = context; // Store for debug purposes
@@ -198,20 +271,23 @@ ${doc.content.substring(0, 500)}...
           })
           .join('\n\n');
 
-        enhancedPrompt = `
-Based on the following relevant context from previous conversations and documentation:
+        contextParts.push(`=== INTERNAL KNOWLEDGE BASE ===\n${contextText}`);
+      }
+    }
 
-${contextText}
+    // Combine all context with user prompt
+    if (contextParts.length > 0) {
+      enhancedPrompt = `
+Based on the following information:
+
+${contextParts.join('\n\n---\n\n')}
 
 ---
 
 User request: ${prompt}
 
-Please generate an agent specification considering the above context.
-        `.trim();
-      }
-    } else {
-      this.lastRetrievedContext = []; // Clear if not using RAG
+Please generate an agent specification considering all the above context, with particular attention to current web information for accuracy and relevance.
+      `.trim();
     }
 
     // Generate agent using base service
@@ -270,6 +346,8 @@ Please generate an agent specification considering the above context.
     documentCount: number;
     conversationCount: number;
     agentCount: number;
+    webSearchEnabled: boolean;
+    webSearchCacheSize?: number;
   } {
     if (!this.isRAGAvailable() || !this.ragService || !this.storageService) {
       return {
@@ -277,6 +355,8 @@ Please generate an agent specification considering the above context.
         documentCount: 0,
         conversationCount: 0,
         agentCount: 0,
+        webSearchEnabled: this.webSearchEnabled,
+        webSearchCacheSize: this.webSearchService?.getCacheSize() || 0,
       };
     }
 
@@ -289,6 +369,8 @@ Please generate an agent specification considering the above context.
       documentCount: documents.length,
       conversationCount: conversationDocs.length,
       agentCount: agentDocs.length,
+      webSearchEnabled: this.webSearchEnabled,
+      webSearchCacheSize: this.webSearchService?.getCacheSize() || 0,
     };
   }
 

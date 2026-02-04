@@ -6,7 +6,7 @@ Welcome to the Meowstik documentation! This index provides a comprehensive overv
 
 This project is in early development. Documentation will be continuously updated as features are implemented.
 
-**Last Updated**: January 29, 2026
+**Last Updated**: January 30, 2026
 
 ---
 
@@ -29,6 +29,12 @@ This project is in early development. Documentation will be continuously updated
 | [docs/api/README.md](docs/api/README.md) | ✅ Available | API reference and usage (content coming soon) |
 | [docs/development/README.md](docs/development/README.md) | ✅ Available | Development environment setup and guidelines (content coming soon) |
 | [docs/examples/README.md](docs/examples/README.md) | ✅ Available | Code examples and tutorials (content coming soon) |
+| [docs/RAG_IMPLEMENTATION.md](docs/RAG_IMPLEMENTATION.md) | ✅ Available | RAG (Retrieval-Augmented Generation) system implementation |
+| [docs/MEMORY_AND_RAG.md](docs/MEMORY_AND_RAG.md) | ✅ Available | Memory architecture and RAG overview |
+| [docs/CAPTAINS_LOG.md](docs/CAPTAINS_LOG.md) | ✅ Available | Captain's Log self-evolution system |
+| [docs/GOOGLE_CUSTOM_SEARCH_PROPOSAL.md](docs/GOOGLE_CUSTOM_SEARCH_PROPOSAL.md) | ✅ Available | Google Custom Search integration proposal and architecture |
+| [docs/WEB_SEARCH_IMPLEMENTATION_GUIDE.md](docs/WEB_SEARCH_IMPLEMENTATION_GUIDE.md) | ✅ Available | Web search integration step-by-step implementation guide |
+| [docs/WEB_SEARCH_QUICK_TEST.md](docs/WEB_SEARCH_QUICK_TEST.md) | ✅ Available | Quick test script for web search integration |
 
 ### User Guides
 
@@ -51,8 +57,11 @@ This project is in early development. Documentation will be continuously updated
 
 ### For Users
 - **New to Meowstik?** Start with the [README.md](README.md)
+- **Setting up web search?** See [Web Search Implementation Guide](docs/WEB_SEARCH_IMPLEMENTATION_GUIDE.md)
+- **Quick web search test?** See [Web Search Quick Test](docs/WEB_SEARCH_QUICK_TEST.md)
+- **Understanding RAG?** See [RAG Implementation](docs/RAG_IMPLEMENTATION.md)
 - **Need help?** Check the troubleshooting guide (coming soon)
-- **Looking for examples?** See the examples directory (coming soon)
+- **Looking for examples?** See [Web Search Examples](src/examples/WebSearchExample.ts)
 
 ### For Contributors
 - **Want to contribute?** Read [CONTRIBUTING.md](CONTRIBUTING.md)
